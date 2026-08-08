@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap', preload: false });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap', preload: false });
 
 export const metadata: Metadata = {
   title: 'MY3D.PR | Impresión 3D de Alta Calidad & Custom Studio en Puerto Rico',
