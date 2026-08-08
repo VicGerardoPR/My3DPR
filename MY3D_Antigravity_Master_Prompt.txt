@@ -1,0 +1,498 @@
+MY3D.PR — MASTER PROMPT PARA GOOGLE ANTIGRAVITY
+
+ACTÚA COMO:
+Un equipo senior completo de desarrollo compuesto por:
+- Senior Full-Stack Engineer
+- Senior UI/UX Designer
+- E-Commerce Architect
+- Database Architect
+- DevOps Engineer
+- Cybersecurity Engineer
+- SEO Specialist
+- QA Engineer
+- Product Manager
+
+MISIÓN
+Diseña, programa, prueba, documenta y deja listo para producción un e-commerce real para MY3D.PR, un negocio de productos impresos en 3D. La tienda comenzará con más de 100 productos y debe escalar a cientos o miles de SKUs.
+
+REFERENCIA
+Usa https://thingfetti.com/ únicamente como referencia de UX, navegación, descubrimiento de productos, catálogo visual, colecciones, merchandising y experiencia tipo Build-a-Box.
+NO copies código, textos, branding, imágenes ni diseño pixel-for-pixel. Crea una identidad original para MY3D.PR.
+
+BRANDING
+Usa el logo MY3D.PR adjunto al proyecto como fuente principal de identidad.
+Paleta visual: negro/grafito como base; cyan/turquesa eléctrico como color primario; naranja como acento; verdes y tonos secundarios del símbolo 3D como acentos ocasionales.
+Extrae del logo valores HEX aproximados y crea design tokens/CSS variables.
+La estética debe sentirse moderna, tecnológica, premium, divertida, limpia, 3D y profesional, sin verse infantil ni como una plantilla genérica de IA.
+
+MOBILE FIRST
+Diseña mobile-first. Gran parte del tráfico vendrá de Instagram, TikTok, Facebook, Google y posteriormente WhatsApp. Debe funcionar perfectamente desde 320px, iPhone, Android, tablet, laptop, desktop y ultrawide.
+
+STACK RECOMENDADO
+- Next.js estable + React + TypeScript
+- Tailwind CSS
+- shadcn/ui cuando aporte valor
+- Lucide Icons
+- Framer Motion para animaciones sutiles
+- PostgreSQL + Supabase
+- Supabase Auth, Storage y Row Level Security
+- Stripe
+- PayPal
+- ATH Móvil, mediante integración oficial/configurable cuando existan credenciales
+- Arquitectura de shipping preparada para Shippo o EasyPost
+- Resend para email
+- GA4 + Meta Pixel
+- Vercel
+- Next/Image con WebP/AVIF
+
+No inventes APIs, credenciales ni capacidades de proveedores.
+
+ARQUITECTURA
+Separa correctamente storefront, admin, products, categories, collections, variants, inventory, carts, orders, payments, shipping, customers, promotions, reviews, wishlist, Build-a-Box, Custom Studio, quotes, analytics y settings.
+Mantén /app, /components, /features, /lib, /services, /hooks, /types, /utils, /config, /database y /public organizados.
+
+IDIOMAS
+La tienda debe ser bilingüe Español/Inglés, con español como default. Implementa i18n real; no dupliques páginas manualmente. Los productos deben poder tener name_es/name_en y description_es/description_en.
+
+MONEDA Y MERCADO
+USD.
+Shipping a todo Puerto Rico y Estados Unidos.
+
+HEADER
+Desktop: logo, Inicio, Tienda, Categorías, Build Your Box, Personalizados, Nuevos, Ofertas, búsqueda, wishlist, cuenta, carrito y selector ES/EN.
+Mobile: logo, búsqueda, cuenta, carrito y menú.
+Header sticky y rápido.
+
+HOME
+Incluye:
+1. Announcement bar para shipping/promociones.
+2. Hero impactante con productos MY3D, CTA Shop Now y Customize Yours.
+3. Categorías principales: Figuras, Articulados, Anime, Gaming, Llaveros, Decoración, Personalizados, Coleccionables.
+4. Trending Now.
+5. New Drops.
+6. Build Your Box destacado.
+7. Best Sellers.
+8. Custom Studio.
+9. Ofertas.
+10. Instagram @my3d.pr preparado para API oficial.
+11. Beneficios: PR + USA shipping, secure payments, custom designs, 3D printed, support.
+12. Newsletter.
+13. Footer completo.
+
+CATÁLOGO
+/shop debe soportar cientos/miles de productos.
+Filtros: categoría, colección, precio, tamaño, color, material, disponibilidad, nuevo, sale, best seller, customizable, ready-to-ship, made-to-order.
+Sorting: Featured, Newest, Best Selling, Price Low-High, Price High-Low, Name.
+Filtros móviles mediante drawer. Evita cargar todo el catálogo inicialmente.
+
+SEARCH
+Búsqueda por nombre, SKU, categoría, colección, tags, personaje, theme y descripción.
+Autocomplete, suggestions y recent searches.
+Arquitectura preparada para Algolia, Meilisearch o Typesense si se necesita posteriormente.
+
+PRODUCT PAGE
+Nombre, SKU, categoría, colección, precio, sale price, imágenes, video opcional, descripción, stock, status, material, dimensiones, peso, production time, shipping info, reviews y related products.
+Gallery con zoom, thumbnails y swipe móvil.
+
+VARIANTES
+Size, Color, Material, Style, Finish.
+Cada variante puede tener SKU, precio, stock, imagen y peso.
+Precio e imagen deben cambiar correctamente según selección.
+
+ESTADOS DE PRODUCTO
+AVAILABLE
+READY TO SHIP
+MADE TO ORDER
+LOW STOCK
+OUT OF STOCK
+PRE-ORDER
+COMING SOON
+Usa badges visuales consistentes.
+
+PERSONALIZACIÓN — OPCIÓN C
+Implementa AMBOS modelos:
+
+A) Personalización directa del producto:
+- Size
+- Color
+- Material
+- Quantity
+- Custom Text/Name
+- Notes
+- Opciones que pueden aumentar/disminuir precio en tiempo real.
+
+B) MY3D CUSTOM STUDIO:
+Ruta /custom.
+Permite solicitar trabajos totalmente personalizados.
+Campos: Name, Email, Phone optional, Project Name, Description, Desired Size, Quantity, Colors, Material, Deadline optional, Budget optional, Notes.
+Uploads: imágenes, logos, STL, 3MF, OBJ, ZIP y PDF.
+Valida extensión, MIME y tamaño. Los archivos privados nunca deben quedar públicamente accesibles.
+
+COTIZACIONES
+Estados:
+SUBMITTED
+UNDER REVIEW
+NEEDS INFORMATION
+QUOTED
+APPROVED
+REJECTED
+PAID
+IN PRODUCTION
+READY
+SHIPPED
+COMPLETED
+CANCELLED
+
+Admin puede revisar archivos, agregar notas internas, pedir información, establecer precio, shipping y tiempo estimado y emitir quote.
+Cliente recibe Quote Number, descripción, precio, shipping, tax, total y expiration date.
+Botón ACCEPT & PAY.
+Al pagarse, Quote debe convertirse en Order sin volver a pedir la información.
+
+BUILD YOUR BOX
+Ruta /build-a-box.
+Debe ser una experiencia visual destacada inspirada conceptualmente en la facilidad de ThingFetti, pero original.
+Admin puede crear boxes configurables con nombre, número requerido de items, productos/categorías elegibles, base price, discount, imagen y estado.
+Ejemplos demo: Mini Box 5, Box 10, Mega Box 20, pero NO hardcodear esos números.
+Flujo:
+1 Choose Box
+2 Pick Items
+3 Customize
+4 Review
+5 Add to Cart
+Mostrar progreso como 5/10 selected.
+No permitir añadir un box incompleto.
+Mostrar precio individual, precio box y ahorro.
+
+CARRITO
+Mini cart + página completa.
+Imagen, producto, variante, personalización, cantidad y precio.
+Aumentar/disminuir, remove, save for later, promo code.
+Estimated subtotal/shipping.
+Free-shipping progress administrable.
+
+CHECKOUT
+Guest Checkout y Account Checkout. Nunca obligar a crear cuenta.
+Email, name, address, apartment, city, state, ZIP, country, phone optional, shipping/billing, shipping method, payment method y review.
+Después de compra guest, ofrecer crear cuenta para tracking.
+
+PAGOS
+Diseña una payment abstraction layer.
+Stripe: Visa, Mastercard, Amex, Discover cuando aplique, Apple Pay y Google Pay.
+PayPal.
+ATH Móvil.
+No inventes integración ATH Móvil: prepara adapter/configuración segura y documenta lo pendiente hasta disponer de API/credenciales oficiales.
+Nunca almacenes tarjeta completa ni CVV.
+Valida firmas de webhooks y procesa webhooks de manera idempotente.
+
+SHIPPING
+Puerto Rico + Estados Unidos.
+Shipping abstraction preparada para Shippo/EasyPost y carriers como USPS/UPS/FedEx según proveedor.
+Admin: Flat Rate, Free Shipping, Calculated Shipping y future Pickup.
+Reglas separadas PR/USA y free-shipping threshold.
+
+TAX
+No hardcodear tasas. Crear tax abstraction preparada para Stripe Tax, TaxJar o Avalara. Puerto Rico debe poder configurarse correctamente. Mantener taxes administrables hasta definir la solución fiscal definitiva.
+
+AUTH
+Supabase Auth.
+Email/password y Magic Link; preparado para Google/Apple.
+Guest checkout siempre disponible.
+
+CUENTA
+/account:
+Orders
+Tracking
+Custom Requests
+Quotes
+Wishlist
+Addresses
+Profile
+Security
+
+WISHLIST
+Usuarios: database.
+Guests: local storage.
+Preparar sincronización al crear/iniciar cuenta.
+
+ORDER TRACKING
+ORDER RECEIVED
+PAYMENT CONFIRMED
+IN PRODUCTION
+READY TO SHIP
+SHIPPED
+DELIVERED
+CANCELLED
+Timeline, tracking number, carrier y tracking link.
+
+ADMIN DASHBOARD
+/admin protegido con autorización server-side + RBAC.
+Roles: SUPER_ADMIN, ADMIN, MANAGER, FULFILLMENT.
+KPIs: Today's Sales, Month Sales, Orders, AOV, Customers, Products, Low Stock, Custom Requests, Pending Quotes, Top Products.
+Gráficas de revenue/orders/categories con selector de rango.
+
+PRODUCT MANAGEMENT
+Create/Edit/Duplicate/Archive/Delete.
+Campos: Name, Slug, SKU, descriptions, category, collection, tags, price, cost, sale price, images, video, material, weight, dimensions, status, stock, customizable, featured, new, best seller.
+
+IMPORTACIÓN MASIVA
+Es crítica para +100 productos.
+Importar CSV y XLSX con mapping de columnas.
+Preview y validación: Valid / Warnings / Errors.
+No insertar filas inválidas silenciosamente.
+Permitir exportar catálogo.
+
+INVENTARIO
+Por Product/Variant.
+Quantity Available, Reserved, Low Stock Threshold.
+Movimientos: SALE, RETURN, ADJUSTMENT, RESTOCK.
+Evitar stock negativo salvo setting explícito.
+Diseñar el checkout para minimizar overselling/concurrency problems.
+
+CATEGORÍAS
+Ilimitadas, no hardcodeadas.
+Name, slug, description, image, parent category, active, sort order.
+Subcategorías.
+
+PROMOCIONES
+Coupons, percentage, fixed, free shipping, BOGO, bundles y quantity discounts.
+Condiciones por minimum purchase, product, category, customer, dates y usage limits.
+
+REVIEWS
+1–5 estrellas, texto, nombre, verified purchase y moderation.
+Average rating + count.
+
+INSTAGRAM
+Preparar integración oficial para @my3d.pr. No usar scraping frágil.
+CTA Follow @MY3D.PR.
+
+WHATSAPP
+Preparado pero inicialmente desactivado:
+WHATSAPP_ENABLED=false
+Configurar número posteriormente desde settings/environment.
+
+SEO
+Metadata dinámica, titles/descriptions, canonical, OpenGraph, social cards, sitemap, robots.txt y JSON-LD Product/Offer/Review/Breadcrumb/Organization.
+URLs limpias y SEO-friendly.
+
+PERFORMANCE
+Objetivo Lighthouse >90 en Performance, Accessibility, Best Practices y SEO cuando sea razonable.
+Optimiza imágenes, fonts, JS, queries y caching.
+Usa pagination/infinite loading optimizado.
+
+ACCESSIBILITY
+WCAG AA cuando sea razonable: keyboard navigation, focus states, ARIA, contraste, alt text y forms accesibles.
+
+SECURITY
+Supabase RLS, RBAC, autorización server-side, Zod, rate limiting, CSRF donde corresponda, XSS mitigation, SQL injection protection, secure headers/cookies y validación estricta de uploads.
+Secrets únicamente server-side/environment variables.
+
+DATABASE
+Schema normalizado con UUID, timestamps, foreign keys, indexes y constraints.
+Tablas mínimas:
+users/profiles
+addresses
+products
+product_variants
+product_images
+categories
+product_categories
+collections
+product_collections
+inventory
+inventory_movements
+carts
+cart_items
+orders
+order_items
+order_status_history
+payments
+shipping_methods
+shipments
+coupons
+promotions
+wishlists
+wishlist_items
+reviews
+custom_requests
+custom_request_files
+quotes
+quote_items
+box_templates
+box_template_products
+customer_boxes
+customer_box_items
+settings
+audit_logs
+
+Crea migrations y RLS policies.
+
+AUDIT LOG
+Registra cambios administrativos sensibles: admin, action, entity, entity_id, old_value, new_value, timestamp.
+
+EMAIL
+Templates preparados para Welcome, Order Confirmation, Payment Confirmation, Shipped, Delivered, Password Reset, Custom Request Received, Quote Ready, Quote Expiring y Low Stock Admin Alert.
+
+ERROR/EMPTY STATES
+Diseña No Products, No Results, Empty Cart, Empty Wishlist, Payment Failure, 404, 500 y Out of Stock. Nunca expongas errores internos al cliente.
+
+DOMAIN
+Todavía no existe dominio definitivo.
+Usa NEXT_PUBLIC_SITE_URL y deja deployment preparado para dominio personalizado en Vercel.
+
+LEGAL
+Templates editables para Privacy Policy, Terms, Shipping, Returns, Custom Order Policy, FAQ y Contact.
+No inventes términos legales definitivos; marca lo que requiere aprobación del propietario.
+
+ANALYTICS
+GA4 + Meta Pixel.
+Eventos: view_item, search, add_to_cart, remove_from_cart, view_cart, begin_checkout, add_payment_info, purchase, sign_up, login, add_to_wishlist, build_box_started, build_box_completed, custom_request_submitted, quote_accepted.
+
+ADMIN SETTINGS
+Store, email, phone, address, currency, language, PR/USA shipping, free shipping threshold, Stripe, PayPal, ATH Móvil, Instagram, Facebook, TikTok, WhatsApp, SEO y feature toggles para Build Your Box, Reviews, Wishlist, Custom Studio y Newsletter.
+
+DESIGN DETAILS
+Cards con rounded corners, subtle borders y premium shadows.
+Hover sutil con elevación/image zoom.
+Animaciones cortas y útiles.
+Detalles inspirados en impresión 3D, layers, filament, geometry/polygons sin saturar.
+Los productos siempre deben ser protagonistas.
+
+PRODUCT CARDS
+Imagen, badges, name, price/sale, rating, quick add y wishlist.
+Badges: NEW, SALE, BEST SELLER, MADE TO ORDER, LOW STOCK, PRE-ORDER.
+
+QUICK VIEW
+Modal desktop y bottom sheet mobile.
+
+ADMIN SEARCH
+CMD/CTRL+K para Products, Orders, Customers y Quotes.
+
+SEED DATA
+Crea 12–20 productos DEMO claramente marcados, suficientes para probar variants, stock, sale, personalization, categories y Build-a-Box.
+No pierdas tiempo creando manualmente 100 productos; los reales se importarán.
+
+TESTING
+Prueba register/login, guest checkout, cart, coupon, variants, Build-a-Box, Custom Request, Quote, payment test, inventory reduction y admin permissions.
+
+TEST CRÍTICO DE COMPRA
+HOME → SHOP → PRODUCT → SELECT VARIANT → CUSTOMIZE → ADD TO CART → CART → CHECKOUT → TEST PAYMENT → ORDER CREATED → INVENTORY UPDATED → CONFIRMATION → ADMIN ORDER VIEW.
+Si falla cualquier paso, corrígelo.
+
+TEST BUILD-A-BOX
+Select Box → Select Products → Complete Required Quantity → Review → Cart → Checkout → Order.
+No aceptar box incompleto.
+
+TEST CUSTOM ORDER
+Submit Request → Upload → Admin Review → Quote → Customer Quote → Accept → Payment → Order → Production → Shipping.
+
+NO FAKE FUNCTIONALITY
+No botones falsos, checkout falso, login falso, filtros falsos, uploads falsos ni dashboard decorativo.
+Si falta una credencial externa, implementa la infraestructura real posible, muestra configuración pendiente y documenta exactamente qué falta.
+
+ENVIRONMENT VARIABLES
+Crear .env.example con placeholders para:
+NEXT_PUBLIC_SITE_URL
+SUPABASE_URL
+SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+STRIPE_PUBLIC_KEY
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+PAYPAL_CLIENT_ID
+PAYPAL_CLIENT_SECRET
+ATH_MOBILE_*
+RESEND_API_KEY
+INSTAGRAM_*
+GA_MEASUREMENT_ID
+META_PIXEL_ID
+
+Nunca subir secretos reales a Git.
+
+README
+Documenta instalación, desarrollo, Supabase, database, env vars, Stripe, PayPal, ATH Móvil, shipping, email, Instagram, deployment, domain, admin y CSV/XLSX import.
+
+ESTRATEGIA DE DESARROLLO
+No construyas todo superficialmente en un solo paso.
+Fases:
+1 Architecture + Design System
+2 Database + Auth
+3 Catalog + Products
+4 Cart
+5 Checkout
+6 Payments
+7 Orders + Inventory
+8 Admin
+9 Build Your Box
+10 Custom Studio + Quotes
+11 Shipping
+12 Bilingual
+13 SEO + Analytics
+14 Security
+15 Testing
+16 Performance
+17 Deployment preparation
+
+Después de cada fase:
+RUN → TEST → CHECK ERRORS → FIX → CONTINUE.
+
+No te detengas después del plan. Continúa implementando.
+
+TOMA DE DECISIONES
+No preguntes por decisiones técnicas menores. Elige en este orden:
+1 seguridad
+2 mantenibilidad
+3 escalabilidad
+4 costo razonable
+5 facilidad administrativa
+
+Pregunta solamente si necesitas credenciales, si una decisión cambia costos significativamente, tiene implicaciones legales o no existe información suficiente para continuar.
+
+ENTREGABLE FINAL
+Working Storefront
+Working Admin
+Working Database
+Working Authentication
+Working Cart
+Guest Checkout
+Customer Accounts
+Inventory
+Build-a-Box
+Custom Requests
+Quotes
+Wishlist
+Search/Filters
+Bilingual
+Payment integrations según credenciales
+Shipping architecture
+Responsive UI
+SEO
+Analytics hooks
+Security
+Tests
+README
+.env.example
+Migrations
+Seed data
+
+AUDITORÍA FINAL
+Revisa diseño, funcionalidad, database, security, mobile, performance, accessibility, SEO, payments, inventory, shipping, admin y translations.
+Busca broken links, console errors, TypeScript/build errors, missing translations, overflow, mobile issues, unprotected routes, exposed secrets, invalid RLS, loading/error states.
+Ejecuta production build y corrige errores críticos.
+
+FUTURO
+No implementes innecesariamente ahora, pero deja arquitectura preparada para Gift Cards, Loyalty/Rewards, Subscriptions, Wholesale/B2B, Affiliate Codes, Abandoned Cart, Recommendations, Recently Viewed, AI Search, 3D Product Viewer, AR Preview, multiple admins, pickup locations y advanced sales reports.
+
+REGLA FINAL
+Esto NO es un prototipo ni una landing page.
+Es la base de una tienda e-commerce real que manejará dinero, clientes, inventario, archivos, cotizaciones y órdenes reales.
+Prioriza SECURITY, RELIABILITY, UX, MAINTAINABILITY y SCALABILITY.
+
+COMIENZA AHORA:
+1. Analiza requisitos.
+2. Propón arquitectura.
+3. Diseña database schema.
+4. Crea sitemap.
+5. Crea design system usando el logo MY3D adjunto.
+6. Crea estructura del proyecto.
+7. Empieza implementación por fases.
+8. No te detengas después de generar el plan: continúa construyendo y probando.
