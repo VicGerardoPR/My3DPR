@@ -1,55 +1,81 @@
-import { supabase } from './supabase';
+import { createClient } from '@supabase/supabase-js';
 
-// ── Demo credentials (used when Supabase is not configured) ─────────────────
-export const DEMO_ADMINS = [
-  { email: 'admin@my3d.pr',   password: 'my3d2026',  name: 'Admin Principal',  role: 'SUPER_ADMIN' },
-  { email: 'victor@my3d.pr',  password: 'victor2026', name: 'Victor Gerardo',   role: 'SUPER_ADMIN' },
-  { email: 'ops@my3d.pr',     password: 'ops2026',    name: 'Operaciones',      role: 'ADMIN'        },
+// ── Supabase client with service role (server-side only) ─────────────────────
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+// Public client for auth operations (uses anon key)
+const getAuthClient = () => {
+  if (!supabaseUrl || !anonKey || supabaseUrl.includes('your-project')) return null;
+  return createClient(supabaseUrl, anonKey);
+};
+
+// Admin client for whitelist verification (uses service role)
+const getAdminClient = () => {
+  if (!supabaseUrl || !serviceRoleKey || supabaseUrl.includes('your-project')) return null;
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+};
+
+// ── Demo credentials (fallback when Supabase is not configured) ──────────────
+const DEMO_ADMINS = [
+  { email: 'admin@my3d.pr',   password: 'my3d2026',  name: 'Admin Principal', role: 'SUPER_ADMIN' },
+  { email: 'victor@my3d.pr',  password: 'victor2026', name: 'Victor Gerardo',  role: 'SUPER_ADMIN' },
+  { email: 'ops@my3d.pr',     password: 'ops2026',    name: 'Operaciones',     role: 'ADMIN'       },
 ];
 
 // ── Auth helpers ─────────────────────────────────────────────────────────────
 
 /**
- * Validates admin credentials.
- * - With Supabase: checks auth.users and admin_whitelist table
- * - Without Supabase (demo mode): checks against DEMO_ADMINS
+ * Validates admin credentials against Supabase Auth + admin_whitelist.
+ * Falls back to demo credentials when Supabase is not configured.
  */
 export async function validateAdminLogin(
   email: string,
   password: string
 ): Promise<{ success: boolean; name?: string; role?: string; error?: string }> {
-  // Try Supabase Auth first
-  if (supabase) {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return { success: false, error: 'Credenciales incorrectas.' };
+  const authClient = getAuthClient();
+  const adminClient = getAdminClient();
 
-      // Check whitelist table
-      const { data: whitelist } = await supabase
+  if (authClient && adminClient) {
+    try {
+      // 1. Authenticate with Supabase Auth
+      const { data, error } = await authClient.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
+      });
+
+      if (error || !data.user) {
+        return { success: false, error: 'Email o contraseña incorrectos.' };
+      }
+
+      // 2. Verify email is in admin_whitelist (using service role to bypass RLS)
+      const { data: whitelist, error: wlError } = await adminClient
         .from('admin_whitelist')
-        .select('role, full_name')
-        .eq('email', email)
+        .select('role, full_name, active')
+        .eq('email', email.toLowerCase().trim())
+        .eq('active', true)
         .single();
 
-      if (!whitelist) {
-        await supabase.auth.signOut();
-        return { success: false, error: 'No tienes acceso al panel administrativo.' };
+      if (wlError || !whitelist) {
+        await authClient.auth.signOut();
+        return { success: false, error: 'No tienes acceso al panel administrativo. Contacta al administrador.' };
       }
 
       return { success: true, name: whitelist.full_name, role: whitelist.role };
-    } catch {
+    } catch (err) {
+      console.error('Supabase auth error:', err);
       // Fall through to demo mode
     }
   }
 
-  // Demo mode fallback
+  // ── Demo mode fallback (no Supabase configured) ────────────────────────────
   const admin = DEMO_ADMINS.find(
     (a) => a.email === email.toLowerCase().trim() && a.password === password
   );
-
-  if (admin) {
-    return { success: true, name: admin.name, role: admin.role };
-  }
+  if (admin) return { success: true, name: admin.name, role: admin.role };
 
   return { success: false, error: 'Credenciales incorrectas.' };
 }
@@ -81,7 +107,8 @@ export interface FinancialKPIs {
  * - Without Supabase: realistic demo data
  */
 export async function getFinancialKPIs(): Promise<FinancialKPIs> {
-  if (supabase) {
+  const db = getAdminClient();
+  if (db) {
     try {
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
@@ -89,11 +116,11 @@ export async function getFinancialKPIs(): Promise<FinancialKPIs> {
       const monthAgo = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
 
       const [todayOrders, weekOrders, monthOrders, allOrders, customQuotes] = await Promise.all([
-        supabase.from('orders').select('total_amount, payment_method').gte('created_at', todayStr).eq('payment_status', 'PAID'),
-        supabase.from('orders').select('total_amount').gte('created_at', weekAgo).eq('payment_status', 'PAID'),
-        supabase.from('orders').select('total_amount').gte('created_at', monthAgo).eq('payment_status', 'PAID'),
-        supabase.from('orders').select('status, total_amount, payment_method').order('created_at', { ascending: false }).limit(200),
-        supabase.from('custom_requests').select('budget, status').eq('status', 'SUBMITTED'),
+        db.from('orders').select('total_amount, payment_method').gte('created_at', todayStr).eq('payment_status', 'PAID'),
+        db.from('orders').select('total_amount').gte('created_at', weekAgo).eq('payment_status', 'PAID'),
+        db.from('orders').select('total_amount').gte('created_at', monthAgo).eq('payment_status', 'PAID'),
+        db.from('orders').select('status, total_amount, payment_method').order('created_at', { ascending: false }).limit(200),
+        db.from('custom_requests').select('budget, status').eq('status', 'SUBMITTED'),
       ]);
 
       const salesToday = todayOrders.data?.reduce((s, o) => s + o.total_amount, 0) ?? 0;
