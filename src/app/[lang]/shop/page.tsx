@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, Search, X, Check, Grid, List } from 'lucide-react';
 import { Locale, dictionaries } from '@/lib/i18n';
 import { DEMO_PRODUCTS, DEMO_CATEGORIES } from '@/lib/seed-data';
 import { ProductCard } from '@/components/shop/ProductCard';
 
-export default function ShopPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default function ShopPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const searchParams = useSearchParams();
 
   const categoryQuery = searchParams.get('category');

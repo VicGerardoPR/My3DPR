@@ -5,7 +5,8 @@ import { Locale, getDictionary } from '@/lib/i18n';
 import { DEMO_CATEGORIES, DEMO_PRODUCTS, DEMO_BOX_TEMPLATES } from '@/lib/seed-data';
 import { ProductCard } from '@/components/shop/ProductCard';
 
-export default function HomePage({ params: { lang } }: { params: { lang: Locale } }) {
+export default async function HomePage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = await params;
   const dict = getDictionary(lang);
 
   const trendingProducts = DEMO_PRODUCTS.slice(0, 4);
@@ -59,8 +60,8 @@ export default function HomePage({ params: { lang } }: { params: { lang: Locale 
             {/* Quick Metrics */}
             <div className="pt-6 border-t border-brand-dark-border/60 grid grid-cols-3 gap-4 text-center lg:text-left">
               <div>
-                <span className="font-heading font-extrabold text-2xl text-slate-100">100+</span>
-                <p className="text-[11px] text-slate-400">Modelos en Stock</p>
+                <span className="font-heading font-extrabold text-2xl text-slate-100">3D</span>
+                <p className="text-[11px] text-slate-400">Modelos hechos con detalle</p>
               </div>
               <div>
                 <span className="font-heading font-extrabold text-2xl text-brand-cyan">100%</span>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Package, Clock, Heart, User, CheckCircle2, Truck, FileText, ChevronRight } from 'lucide-react';
 import { Locale } from '@/lib/i18n';
@@ -31,7 +31,8 @@ const DEMO_ORDERS = [
   }
 ];
 
-export default function AccountPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default function AccountPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') || 'orders';
   const [activeTab, setActiveTab] = useState(initialTab);

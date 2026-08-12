@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import Image from 'next/image';
 import { Box, Sparkles, Check, Trash2, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { Locale, dictionaries } from '@/lib/i18n';
@@ -8,7 +8,8 @@ import { DEMO_BOX_TEMPLATES, DEMO_PRODUCTS } from '@/lib/seed-data';
 import { BoxTemplate, Product } from '@/types';
 import { useCart } from '@/lib/cart-store';
 
-export default function BuildABoxPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default function BuildABoxPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const dict = dictionaries[lang].box;
   const { addItem } = useCart();
 

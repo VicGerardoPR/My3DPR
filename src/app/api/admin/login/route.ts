@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateAdminLogin } from '@/lib/auth';
+import { createAdminSession } from '@/lib/admin-session';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,14 +16,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: result.error }, { status: 401 });
     }
 
-    // Set httpOnly session cookie
+    const sessionSecret = process.env.ADMIN_SESSION_SECRET;
+    if (!sessionSecret) {
+      return NextResponse.json({ success: false, error: 'Autenticación administrativa no configurada.' }, { status: 503 });
+    }
+    const session = await createAdminSession({ email: email.toLowerCase().trim(), role: result.role || 'ADMIN' }, sessionSecret);
+
+    // Set a signed, httpOnly session cookie.
     const response = NextResponse.json({
       success: true,
       name: result.name,
       role: result.role,
     });
 
-    response.cookies.set('admin_session', 'authenticated', {
+    response.cookies.set('admin_session', session, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

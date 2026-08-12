@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, Eye, EyeOff, Lock, Mail, AlertTriangle, Loader2 } from 'lucide-react';
 import { Locale } from '@/lib/i18n';
 
-export default function AdminLoginPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default function AdminLoginPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || `/${lang}/admin`;

@@ -19,18 +19,12 @@ const getAdminClient = () => {
   });
 };
 
-// ── Demo credentials (fallback when Supabase is not configured) ──────────────
-const DEMO_ADMINS = [
-  { email: 'admin@my3d.pr',   password: 'my3d2026',  name: 'Admin Principal', role: 'SUPER_ADMIN' },
-  { email: 'victor@my3d.pr',  password: 'victor2026', name: 'Victor Gerardo',  role: 'SUPER_ADMIN' },
-  { email: 'ops@my3d.pr',     password: 'ops2026',    name: 'Operaciones',     role: 'ADMIN'       },
-];
 
 // ── Auth helpers ─────────────────────────────────────────────────────────────
 
 /**
  * Validates admin credentials against Supabase Auth + admin_whitelist.
- * Falls back to demo credentials when Supabase is not configured.
+ * Fails closed when Supabase Auth is not configured.
  */
 export async function validateAdminLogin(
   email: string,
@@ -67,17 +61,11 @@ export async function validateAdminLogin(
       return { success: true, name: whitelist.full_name, role: whitelist.role };
     } catch (err) {
       console.error('Supabase auth error:', err);
-      // Fall through to demo mode
+      return { success: false, error: 'No fue posible validar la sesión administrativa.' };
     }
   }
 
-  // ── Demo mode fallback (no Supabase configured) ────────────────────────────
-  const admin = DEMO_ADMINS.find(
-    (a) => a.email === email.toLowerCase().trim() && a.password === password
-  );
-  if (admin) return { success: true, name: admin.name, role: admin.role };
-
-  return { success: false, error: 'Credenciales incorrectas.' };
+  return { success: false, error: 'Autenticación administrativa no configurada.' };
 }
 
 // ── Financial Data ──────────────────────────────────────────────────────────
@@ -157,39 +145,28 @@ export async function getFinancialKPIs(): Promise<FinancialKPIs> {
     }
   }
 
-  // ── Demo data ────────────────────────────────────────────────────────────
+  // ── Production Fallback (No Demo Data) ──────────────────────────────────
   return {
-    salesToday: 489.50,
-    salesWeek: 2847.20,
-    salesMonth: 11340.80,
-    growthToday: 18,
-    growthWeek: 12,
-    ordersTotal: 87,
-    ordersActive: 14,
-    ordersInProduction: 5,
-    ordersPending: 3,
-    aov: 34.96,
-    conversionRate: 3.2,
-    customQuotesPipeline: 1250.00,
-    customQuotesPending: 4,
-    topProducts: [
-      { name: 'Dragón Cristal Articulado', revenue: 2199.78, units: 112 },
-      { name: 'Axolotl Kawaii Articulado', revenue: 1547.85, units: 95 },
-      { name: 'Mech Stand Gaming', revenue: 1389.50, units: 73 },
-      { name: 'Llaveros Personalizados', revenue: 893.40, units: 148 },
-      { name: 'Litofanía 3D Personalizada', revenue: 742.50, units: 39 },
-    ],
+    salesToday: 0,
+    salesWeek: 0,
+    salesMonth: 0,
+    growthToday: 0,
+    growthWeek: 0,
+    ordersTotal: 0,
+    ordersActive: 0,
+    ordersInProduction: 0,
+    ordersPending: 0,
+    aov: 0,
+    conversionRate: 0,
+    customQuotesPipeline: 0,
+    customQuotesPending: 0,
+    topProducts: [],
     dailySales: getDemoDailySales(),
-    paymentBreakdown: [
-      { method: 'ATH_MOVIL', amount: 4892.30, count: 41 },
-      { method: 'STRIPE', amount: 4651.20, count: 32 },
-      { method: 'PAYPAL', amount: 1797.30, count: 14 },
-    ],
+    paymentBreakdown: [],
   };
 }
 
 function getDemoDailySales() {
   const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-  const amounts = [312.50, 428.90, 389.20, 512.80, 645.30, 812.40, 489.50];
-  return days.map((day, i) => ({ day, amount: amounts[i] }));
+  return days.map((day) => ({ day, amount: 0 }));
 }

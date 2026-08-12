@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { createContext, createElement, ReactNode, useContext, useEffect, useState } from 'react';
 import { CartItem, Product, ProductVariant, Coupon } from '@/types';
 import { DEMO_COUPONS } from './seed-data';
 
@@ -8,7 +8,7 @@ const CART_STORAGE_KEY = 'my3d_cart_v1';
 const COUPON_STORAGE_KEY = 'my3d_coupon_v1';
 export const FREE_SHIPPING_THRESHOLD = 50.00;
 
-export function useCart() {
+function useCartState() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
@@ -158,4 +158,23 @@ export function useCart() {
     appliedCoupon,
     mounted,
   };
+}
+
+type CartContextValue = ReturnType<typeof useCartState>;
+
+const CartContext = createContext<CartContextValue | null>(null);
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const cart = useCartState();
+  return createElement(CartContext.Provider, { value: cart }, children);
+}
+
+export function useCart() {
+  const cart = useContext(CartContext);
+
+  if (!cart) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+
+  return cart;
 }

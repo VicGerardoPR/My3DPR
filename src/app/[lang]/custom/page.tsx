@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { Upload, Sparkles, CheckCircle, FileCode, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
 import { Locale, dictionaries } from '@/lib/i18n';
-import { DataService } from '@/lib/supabase';
 
-export default function CustomStudioPage({ params: { lang } }: { params: { lang: Locale } }) {
+
+export default function CustomStudioPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const dict = dictionaries[lang].custom;
 
   const [formData, setFormData] = useState({
@@ -24,6 +25,7 @@ export default function CustomStudioPage({ params: { lang } }: { params: { lang:
   const [files, setFiles] = useState<File[]>([]);
   const [submittedRequestNumber, setSubmittedRequestNumber] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -38,26 +40,24 @@ export default function CustomStudioPage({ params: { lang } }: { params: { lang:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (files.length > 0) {
+      setErrorMessage('La carga privada de archivos todavía no está habilitada. Envía la solicitud sin archivos o contacta al administrador.');
+      return;
+    }
     setLoading(true);
+    setErrorMessage(null);
 
     try {
-      const res = await DataService.createCustomRequest({
-        customer_name: formData.customer_name,
-        customer_email: formData.customer_email,
-        customer_phone: formData.customer_phone,
-        project_name: formData.project_name,
-        description: formData.description,
-        desired_size: formData.desired_size,
-        quantity: Number(formData.quantity),
-        colors: formData.colors,
-        material: formData.material,
-        budget: formData.budget ? Number(formData.budget) : undefined,
-        status: 'SUBMITTED',
+      const response = await fetch('/api/custom-quotes', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...formData, quantity: Number(formData.quantity), budget: formData.budget ? Number(formData.budget) : undefined }),
       });
-
-      setSubmittedRequestNumber(res.request_number);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'No fue posible registrar la solicitud.');
+      setSubmittedRequestNumber(result.requestNumber);
     } catch (err) {
-      console.error('Error submitting quote request', err);
+      setErrorMessage(err instanceof Error ? err.message : 'No fue posible registrar la solicitud.');
     } finally {
       setLoading(false);
     }
@@ -185,7 +185,7 @@ export default function CustomStudioPage({ params: { lang } }: { params: { lang:
               />
               <Upload className="w-8 h-8 text-brand-cyan mx-auto" />
               <p className="text-xs font-semibold text-slate-200">{dict.fileUpload}</p>
-              <p className="text-[11px] text-slate-400">Archivos seguros protegidos en almacenamiento privado Supabase.</p>
+              <p className="text-[11px] text-slate-400">La carga privada de archivos estará disponible cuando el almacenamiento sea configurado.</p>
             </div>
 
             {files.length > 0 && (
@@ -209,6 +209,7 @@ export default function CustomStudioPage({ params: { lang } }: { params: { lang:
             <Sparkles className="w-4 h-4" />
             <span>{loading ? 'Procesando...' : dict.submit}</span>
           </button>
+          {errorMessage && <p role="alert" className="text-xs text-red-400">{errorMessage}</p>}
         </form>
       )}
     </div>

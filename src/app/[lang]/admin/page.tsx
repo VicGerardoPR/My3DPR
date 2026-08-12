@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DollarSign, ShoppingBag, Package, Upload, Users,
@@ -16,6 +16,8 @@ import { Product } from '@/types';
 import type { FinancialKPIs } from '@/lib/auth';
 
 type Tab = 'overview' | 'products' | 'import' | 'quotes';
+type ImportRow = Record<string, string | undefined>;
+type ImportError = { row: number; data: ImportRow; reason: string };
 
 // ── Small helper components ──────────────────────────────────────────────────
 
@@ -76,14 +78,15 @@ function SalesBarChart({ data }: { data: { day: string; amount: number }[] }) {
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-export default function AdminDashboardPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default function AdminDashboardPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [kpis, setKpis] = useState<FinancialKPIs | null>(null);
   const [loadingKpis, setLoadingKpis] = useState(true);
   const [products] = useState<Product[]>(DEMO_PRODUCTS);
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [importPreview, setImportPreview] = useState<{ valid: any[]; errors: any[] }>({ valid: [], errors: [] });
+  const [importPreview, setImportPreview] = useState<{ valid: ImportRow[]; errors: ImportError[] }>({ valid: [], errors: [] });
   const [adminName, setAdminName] = useState('Admin');
 
   useEffect(() => {
@@ -108,12 +111,12 @@ export default function AdminDashboardPage({ params: { lang } }: { params: { lan
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
       setImportFile(file);
-      Papa.parse(file, {
+      Papa.parse<ImportRow>(file, {
         header: true,
         complete: (results) => {
-          const valid: any[] = [];
-          const errors: any[] = [];
-          results.data.forEach((row: any, idx: number) => {
+          const valid: ImportRow[] = [];
+          const errors: ImportError[] = [];
+          results.data.forEach((row, idx) => {
             if (row.name_es && row.price && row.sku) valid.push(row);
             else if (Object.keys(row).length > 1) errors.push({ row: idx + 1, data: row, reason: 'Falta SKU, Nombre o Precio' });
           });

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS admin_whitelist (
 
 -- Insertar los 3 administradores
 INSERT INTO admin_whitelist (email, full_name, role) VALUES
-  ('admin@my3d.pr',  'Admin Principal',  'SUPER_ADMIN'),
+  ('admin@my3d.pr',  'Michael Alvarado',  'SUPER_ADMIN'),
   ('victor@my3d.pr', 'Victor Gerardo',   'SUPER_ADMIN'),
   ('ops@my3d.pr',    'Operaciones',      'ADMIN')
 ON CONFLICT (email) DO NOTHING;

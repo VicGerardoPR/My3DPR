@@ -1,25 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, CreditCard, CheckCircle, Lock, ArrowRight, Truck } from 'lucide-react';
 import { Locale } from '@/lib/i18n';
 import { useCart } from '@/lib/cart-store';
-import { PaymentMethod } from '@/types';
-import { PaymentAdapter } from '@/lib/payment-adapters';
-import { DataService } from '@/lib/supabase';
 
-export default function CheckoutPage({ params: { lang } }: { params: { lang: Locale } }) {
+
+export default function CheckoutPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const router = useRouter();
   const { items, subtotal, discount, shippingCost, estimatedTax, total, clearCart } = useCart();
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('ATH_MOVIL');
+  const paymentMethod = 'ATH_MOVIL' as const;
   const [athPhone, setAthPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [completedOrderNumber, setCompletedOrderNumber] = useState<string | null>(null);
   const [athInstructions, setAthInstructions] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const idempotencyKey = useRef<string | null>(null);
 
   const [shippingAddress, setShippingAddress] = useState({
     full_name: '',
@@ -37,60 +38,28 @@ export default function CheckoutPage({ params: { lang } }: { params: { lang: Loc
     e.preventDefault();
     if (items.length === 0) return;
     setLoading(true);
+    setErrorMessage(null);
 
     try {
-      // 1. Create order record
-      const orderRes = await DataService.createOrder({
-        guest_email: shippingAddress.email,
-        subtotal,
-        discount,
-        shipping_cost: shippingCost,
-        tax_amount: estimatedTax,
-        total_amount: total,
-        currency: 'USD',
-        shipping_address: shippingAddress,
-        shipping_method: 'USPS Priority PR/USA',
-        payment_method: paymentMethod,
-        payment_status: paymentMethod === 'ATH_MOVIL' ? 'PENDING' : 'PAID',
-        status: 'ORDER_RECEIVED',
-        items: items.map((i) => ({
-          id: i.id,
-          product_name: i.product.name_es,
-          variant_name: i.variant?.color || i.variant?.size,
-          price: i.variant?.sale_price || i.variant?.price || i.product.sale_price || i.product.price,
-          quantity: i.quantity,
-          custom_text: i.custom_text,
-          item_total: (i.variant?.sale_price || i.variant?.price || i.product.sale_price || i.product.price) * i.quantity,
-        })),
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          email: shippingAddress.email,
+          paymentMethod,
+          idempotencyKey: idempotencyKey.current ??= crypto.randomUUID(),
+          address: shippingAddress,
+          lines: items.map((item) => ({ productId: item.product_id, variantId: item.variant_id, quantity: item.quantity, customText: item.custom_text, customNotes: item.custom_notes })),
+        }),
       });
-
-      // 2. Process payment abstraction
-      const payRes = await PaymentAdapter.processPayment(paymentMethod, {
-        id: 'ord-123',
-        order_number: orderRes.order_number,
-        subtotal,
-        discount,
-        shipping_cost: shippingCost,
-        tax_amount: estimatedTax,
-        total_amount: total,
-        currency: 'USD',
-        shipping_address: shippingAddress,
-        shipping_method: 'USPS Priority',
-        payment_status: 'PENDING',
-        payment_method: paymentMethod,
-        status: 'ORDER_RECEIVED',
-        items: [],
-        created_at: new Date().toISOString(),
-      }, { athPhone });
-
-      if (payRes.instructions) {
-        setAthInstructions(payRes.instructions);
-      }
-
-      setCompletedOrderNumber(orderRes.order_number);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'No fue posible crear la orden.');
+      setAthInstructions(result.instructions);
+      setCompletedOrderNumber(result.orderNumber);
+      idempotencyKey.current = null;
       clearCart();
     } catch (err) {
-      console.error('Order creation error', err);
+      setErrorMessage(err instanceof Error ? err.message : 'No fue posible crear la orden.');
     } finally {
       setLoading(false);
     }
@@ -221,33 +190,18 @@ export default function CheckoutPage({ params: { lang } }: { params: { lang: Loc
             </div>
           </div>
 
-          {/* Payment Method Switcher */}
+          {/* Configured payment method */}
           <div className="bg-brand-dark-card border border-brand-dark-border rounded-3xl p-6 space-y-4">
             <h3 className="font-heading font-bold text-slate-200 text-base flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-brand-cyan" />
               <span>Método de Pago</span>
             </h3>
 
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { id: 'ATH_MOVIL', label: 'ATH Móvil', badge: 'PR FAVORITO' },
-                { id: 'STRIPE', label: 'Tarjeta (Stripe)', badge: 'VISA / MC' },
-                { id: 'PAYPAL', label: 'PayPal', badge: 'EXPRESS' },
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setPaymentMethod(m.id as PaymentMethod)}
-                  className={`p-3 rounded-2xl border text-center transition-all ${
-                    paymentMethod === m.id
-                      ? 'bg-brand-cyan/20 border-brand-cyan text-brand-cyan font-bold shadow-cyan-glow'
-                      : 'bg-brand-dark border-brand-dark-border text-slate-300'
-                  }`}
-                >
-                  <div className="text-xs font-bold">{m.label}</div>
-                  <div className="text-[10px] text-slate-400 mt-1">{m.badge}</div>
-                </button>
-              ))}
+            <div className="grid grid-cols-1 gap-3">
+              <div className="p-3 rounded-2xl border text-center bg-brand-cyan/20 border-brand-cyan text-brand-cyan font-bold shadow-cyan-glow">
+                <div className="text-xs font-bold">ATH Móvil — pago manual verificado</div>
+                <div className="text-[10px] text-slate-400 mt-1">La orden permanece pendiente hasta confirmación del comercio.</div>
+              </div>
             </div>
 
             {paymentMethod === 'ATH_MOVIL' && (
@@ -289,6 +243,7 @@ export default function CheckoutPage({ params: { lang } }: { params: { lang: Loc
             <ShieldCheck className="w-4 h-4" />
             <span>{loading ? 'Procesando...' : 'COMPLETAR ORDEN REAL'}</span>
           </button>
+          {errorMessage && <p role="alert" className="text-xs text-red-400">{errorMessage}</p>}
         </div>
       </form>
     </div>

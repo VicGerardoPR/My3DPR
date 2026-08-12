@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Instagram, Facebook, Send, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { Mail, MapPin, Instagram, Facebook, Send, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { getDictionary, Locale } from '@/lib/i18n';
 
 export function Footer({ lang }: { lang: Locale }) {
@@ -29,7 +29,7 @@ export function Footer({ lang }: { lang: Locale }) {
             </div>
             <div>
               <h4 className="font-semibold text-slate-200 text-base">{lang === 'en' ? '100% Secure Checkout' : 'Pagos Seguros'}</h4>
-              <p className="text-xs text-slate-400">Stripe, PayPal & ATH Móvil</p>
+              <p className="text-xs text-slate-400">ATH Móvil con verificación manual</p>
             </div>
           </div>
 
@@ -64,15 +64,11 @@ export function Footer({ lang }: { lang: Locale }) {
           <div className="space-y-2 text-xs text-slate-300">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-brand-cyan" />
-              <span>San Juan, Puerto Rico (00901)</span>
+              <span>Puerto Rico</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-brand-cyan" />
-              <span>info@my3d.pr</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-brand-cyan" />
-              <span>(787) 555-MY3D</span>
+              <span>{process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'Contacto por configurar'}</span>
             </div>
           </div>
 
@@ -132,10 +128,11 @@ export function Footer({ lang }: { lang: Locale }) {
           <p className="text-xs text-slate-400 mb-3">
             {lang === 'en' ? 'Get exclusive coupons & new drops weekly.' : 'Recibe cupones exclusivos y nuevos modelos cada semana.'}
           </p>
-          <form onSubmit={(e) => { e.preventDefault(); alert(lang === 'en' ? 'Thank you for subscribing!' : '¡Gracias por suscribirte!'); }} className="space-y-2">
+          <form action="/api/newsletter" method="post" className="space-y-2">
             <div className="relative">
               <input
                 type="email"
+                name="email"
                 placeholder="tu@email.com"
                 required
                 className="w-full bg-brand-dark-card border border-brand-dark-border text-slate-200 text-xs rounded-xl px-3 py-2.5 pr-10 focus:outline-none focus:border-brand-cyan"
@@ -153,10 +150,6 @@ export function Footer({ lang }: { lang: Locale }) {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} MY3D.PR. {dict.rights}</p>
           <div className="flex items-center gap-3 font-semibold text-slate-400">
-            <span className="px-2 py-1 bg-brand-dark-card rounded border border-brand-dark-border text-[10px]">VISA</span>
-            <span className="px-2 py-1 bg-brand-dark-card rounded border border-brand-dark-border text-[10px]">MASTERCARD</span>
-            <span className="px-2 py-1 bg-brand-dark-card rounded border border-brand-dark-border text-[10px]">AMEX</span>
-            <span className="px-2 py-1 bg-brand-dark-card rounded border border-brand-dark-border text-[10px]">PAYPAL</span>
             <span className="px-2 py-1 bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan rounded text-[10px] font-bold">ATH MÓVIL</span>
           </div>
         </div>

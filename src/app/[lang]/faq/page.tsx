@@ -1,6 +1,7 @@
 import { Locale } from '@/lib/i18n';
 
-export default function FAQPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default async function FAQPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = await params;
   const faqs = [
     {
       q: '¿Cuánto tiempo tarda en llegar mi pedido en Puerto Rico?',

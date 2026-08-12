@@ -1,6 +1,7 @@
 import { Locale } from '@/lib/i18n';
 
-export default function CustomPolicyPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default async function CustomPolicyPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = await params;
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl space-y-6 text-slate-300 text-sm leading-relaxed">
       <h1 className="font-heading font-black text-3xl text-slate-100">Política de Trabajos Custom & Cotizaciones 3D</h1>

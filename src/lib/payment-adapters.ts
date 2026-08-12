@@ -27,31 +27,23 @@ export class PaymentAdapter {
   }
 
   private static async processStripe(order: Order, _token?: string): Promise<PaymentProcessResult> {
-    const isMock = !process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY.includes('sample');
-    if (isMock) {
-      return {
-        success: true,
-        transactionId: `ch_mock_stripe_${Math.random().toString(36).substring(2, 10)}`,
-      };
-    }
     return {
-      success: true,
-      transactionId: `ch_live_${Math.random().toString(36).substring(2, 10)}`,
+      success: false,
+      errorMessage: 'Stripe no está configurado. No se procesó ningún pago.',
     };
   }
 
   private static async processPayPal(order: Order): Promise<PaymentProcessResult> {
     return {
-      success: true,
-      transactionId: `PAYID-MOCK-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+      success: false,
+      errorMessage: 'PayPal no está configurado. No se procesó ningún pago.',
     };
   }
 
   private static async processATHMovil(order: Order, phone?: string): Promise<PaymentProcessResult> {
     const athPhoneConfig = process.env.ATH_MOBILE_PHONE || '787-000-0000';
     return {
-      success: true,
-      transactionId: `ATH-PR-${Math.floor(100000 + Math.random() * 900000)}`,
+      success: false,
       instructions: `Por favor completa tu pago por $${order.total_amount.toFixed(2)} en la app de ATH Móvil -> Negocios -> MY3D PR o envía el pago al teléfono ${athPhoneConfig} incluyendo la orden #${order.order_number} en el mensaje.`,
     };
   }

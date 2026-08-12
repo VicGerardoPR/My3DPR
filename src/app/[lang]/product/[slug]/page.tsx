@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -12,11 +12,8 @@ import { useCart } from '@/lib/cart-store';
 import { useWishlist } from '@/lib/wishlist-store';
 import { ProductCard } from '@/components/shop/ProductCard';
 
-export default function ProductDetailPage({
-  params: { lang, slug },
-}: {
-  params: { lang: Locale; slug: string };
-}) {
+export default function ProductDetailPage({ params }: { params: Promise<{ lang: Locale; slug: string }> }) {
+  const { lang, slug } = use(params);
   const product = DEMO_PRODUCTS.find((p) => p.slug === slug);
   if (!product) notFound();
 
@@ -93,13 +90,15 @@ export default function ProductDetailPage({
               {lang === 'es' ? product.name_es : product.name_en}
             </h1>
 
-            <div className="flex items-center gap-4 mt-3">
-              <div className="flex items-center gap-1 text-amber-400 text-sm font-bold">
-                <Star className="w-4 h-4 fill-amber-400" />
-                <span>{product.rating || 4.9}</span>
-                <span className="text-slate-400 font-normal">({product.review_count || 12} reseñas)</span>
+            {product.rating != null && product.review_count != null && product.review_count > 0 && (
+              <div className="flex items-center gap-4 mt-3">
+                <div className="flex items-center gap-1 text-amber-400 text-sm font-bold">
+                  <Star className="w-4 h-4 fill-amber-400" />
+                  <span>{product.rating}</span>
+                  <span className="text-slate-400 font-normal">({product.review_count} reseñas)</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Pricing */}

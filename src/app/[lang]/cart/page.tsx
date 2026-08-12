@@ -1,12 +1,15 @@
 'use client';
 
+import { use } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, ArrowRight, Trash2, Plus, Minus, Tag, Sparkles } from 'lucide-react';
 import { Locale } from '@/lib/i18n';
 import { useCart, FREE_SHIPPING_THRESHOLD } from '@/lib/cart-store';
 
-export default function CartPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default function CartPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = use(params);
   const {
     items,
     updateQuantity,
