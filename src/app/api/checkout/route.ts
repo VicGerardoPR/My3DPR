@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { z } from 'zod';
 import { cartLineSchema } from '@/lib/commerce';
 
@@ -45,6 +46,12 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const authClient = anonKey ? createServerClient(url, anonKey, {
+    cookies: { getAll: () => request.cookies.getAll(), setAll: () => undefined },
+  }) : null;
+  const { data: userData } = authClient ? await authClient.auth.getUser() : { data: { user: null } };
+  const verifiedUser = userData.user?.email?.toLowerCase() === parsed.data.email.toLowerCase() ? userData.user : null;
   const { data, error } = await supabase.rpc('create_pending_order_atomic', {
     p_email: parsed.data.email.toLowerCase(),
     p_address: parsed.data.address,
@@ -57,6 +64,7 @@ export async function POST(request: NextRequest) {
     })),
     p_payment_method: parsed.data.paymentMethod,
     p_idempotency_key: parsed.data.idempotencyKey,
+    p_user_id: verifiedUser?.id || null,
   });
 
   if (error) {

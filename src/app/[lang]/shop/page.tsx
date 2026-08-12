@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo, use } from 'react';
+import { useState, useMemo, use, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, Search, X, Check, Grid, List } from 'lucide-react';
 import { Locale, dictionaries } from '@/lib/i18n';
-import { DEMO_PRODUCTS, DEMO_CATEGORIES } from '@/lib/seed-data';
 import { ProductCard } from '@/components/shop/ProductCard';
+import { DataService } from '@/lib/supabase';
+import type { Category, Product } from '@/types';
 
 export default function ShopPage({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = use(params);
@@ -20,11 +21,20 @@ export default function ShopPage({ params }: { params: Promise<{ lang: Locale }>
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const materials = Array.from(new Set(DEMO_PRODUCTS.map((p) => p.material)));
+  useEffect(() => {
+    void Promise.all([DataService.getProducts(), DataService.getCategories()]).then(([nextProducts, nextCategories]) => {
+      setProducts(nextProducts);
+      setCategories(nextCategories);
+    });
+  }, []);
+
+  const materials = Array.from(new Set(products.map((p) => p.material)));
 
   const filteredProducts = useMemo(() => {
-    let list = [...DEMO_PRODUCTS];
+    let list = [...products];
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -37,7 +47,7 @@ export default function ShopPage({ params }: { params: Promise<{ lang: Locale }>
     }
 
     if (selectedCategory !== 'all') {
-      const catObj = DEMO_CATEGORIES.find((c) => c.slug === selectedCategory);
+      const catObj = categories.find((c) => c.slug === selectedCategory);
       if (catObj) {
         list = list.filter((p) => p.category_id === catObj.id);
       }
@@ -61,7 +71,7 @@ export default function ShopPage({ params }: { params: Promise<{ lang: Locale }>
     if (sortBy === 'name') list.sort((a, b) => a.name_es.localeCompare(b.name_es));
 
     return list;
-  }, [selectedCategory, selectedMaterial, selectedStatus, filterQuery, searchQuery, sortBy]);
+  }, [products, categories, selectedCategory, selectedMaterial, selectedStatus, filterQuery, searchQuery, sortBy]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -120,7 +130,7 @@ export default function ShopPage({ params }: { params: Promise<{ lang: Locale }>
               >
                 Todas las Categorías
               </button>
-              {DEMO_CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.slug)}

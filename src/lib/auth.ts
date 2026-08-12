@@ -92,7 +92,7 @@ export interface FinancialKPIs {
 /**
  * Returns financial KPIs.
  * - With Supabase: real data from orders table
- * - Without Supabase: realistic demo data
+ * - Without Supabase: zero-valued safe state
  */
 export async function getFinancialKPIs(): Promise<FinancialKPIs> {
   const db = getAdminClient();
@@ -129,19 +129,19 @@ export async function getFinancialKPIs(): Promise<FinancialKPIs> {
 
       return {
         salesToday, salesWeek, salesMonth,
-        growthToday: 18, growthWeek: 12,
+        growthToday: 0, growthWeek: 0,
         ordersTotal: allOrders.data?.length ?? 0,
         ordersActive, ordersInProduction, ordersPending,
         aov,
-        conversionRate: 3.2,
+        conversionRate: 0,
         customQuotesPipeline: customQuotes.data?.reduce((s, q) => s + (q.budget ?? 0), 0) ?? 0,
         customQuotesPending: customQuotes.data?.length ?? 0,
         topProducts: [],
-        dailySales: getDemoDailySales(),
+        dailySales: getEmptyDailySales(),
         paymentBreakdown: Object.entries(methods).map(([method, v]) => ({ method, ...v })),
       };
     } catch {
-      // Fall through to demo
+      // Fall through to a zero-valued safe state.
     }
   }
 
@@ -161,12 +161,12 @@ export async function getFinancialKPIs(): Promise<FinancialKPIs> {
     customQuotesPipeline: 0,
     customQuotesPending: 0,
     topProducts: [],
-    dailySales: getDemoDailySales(),
+    dailySales: getEmptyDailySales(),
     paymentBreakdown: [],
   };
 }
 
-function getDemoDailySales() {
+function getEmptyDailySales() {
   const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   return days.map((day) => ({ day, amount: 0 }));
 }

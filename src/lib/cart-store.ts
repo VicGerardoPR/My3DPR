@@ -2,7 +2,7 @@
 
 import { createContext, createElement, ReactNode, useContext, useEffect, useState } from 'react';
 import { CartItem, Product, ProductVariant, Coupon } from '@/types';
-import { DEMO_COUPONS } from './seed-data';
+
 
 const CART_STORAGE_KEY = 'my3d_cart_v1';
 const COUPON_STORAGE_KEY = 'my3d_coupon_v1';
@@ -102,14 +102,9 @@ function useCartState() {
   };
 
   const applyCoupon = (code: string): { success: boolean; message: string } => {
-    const found = DEMO_COUPONS.find(
-      (c) => c.code.toUpperCase() === code.trim().toUpperCase() && c.active
-    );
-    if (!found) {
-      return { success: false, message: 'Cupón inválido o expirado.' };
-    }
-    setAppliedCoupon(found);
-    return { success: true, message: `Cupón ${found.code} aplicado con éxito.` };
+    void code;
+    setAppliedCoupon(null);
+    return { success: false, message: 'Los cupones todavía no están habilitados.' };
   };
 
   const removeCoupon = () => {

@@ -11,12 +11,7 @@ CREATE TABLE IF NOT EXISTS admin_whitelist (
   created_at timestamptz DEFAULT now()
 );
 
--- Insertar los 3 administradores
-INSERT INTO admin_whitelist (email, full_name, role) VALUES
-  ('admin@my3d.pr',  'Michael Alvarado',  'SUPER_ADMIN'),
-  ('victor@my3d.pr', 'Victor Gerardo',   'SUPER_ADMIN'),
-  ('ops@my3d.pr',    'Operaciones',      'ADMIN')
-ON CONFLICT (email) DO NOTHING;
+-- Administrators are provisioned explicitly by the owner; no demo users are seeded.
 
 -- ── Categories ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS categories (
@@ -55,7 +50,7 @@ CREATE TABLE IF NOT EXISTS products (
   weight_grams int DEFAULT 100,
   dimensions_cm text,
   lead_time_days int DEFAULT 3,
-  rating numeric(3,1) DEFAULT 5.0,
+  rating numeric(3,1),
   review_count int DEFAULT 0,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()

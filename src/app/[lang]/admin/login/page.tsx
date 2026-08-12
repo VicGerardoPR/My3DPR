@@ -136,7 +136,6 @@ export default function AdminLoginPage({ params }: { params: Promise<{ lang: Loc
             </button>
           </form>
 
-          {/* Demo hint */}
           <div className="mt-6 pt-5 border-t border-brand-dark-border">
             <p className="text-[10px] text-slate-600 text-center font-mono">
               Acceso restringido a administradores autorizados de MY3D.PR

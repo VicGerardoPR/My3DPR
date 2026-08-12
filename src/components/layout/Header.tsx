@@ -8,7 +8,8 @@ import { Search, ShoppingBag, Heart, User, Menu, X, Globe, Box, Sparkles, Slider
 import { getDictionary, Locale } from '@/lib/i18n';
 import { useCart } from '@/lib/cart-store';
 import { useWishlist } from '@/lib/wishlist-store';
-import { DEMO_PRODUCTS } from '@/lib/seed-data';
+import type { Product } from '@/types';
+
 
 export function Header({ lang }: { lang: Locale }) {
   const dict = getDictionary(lang).nav;
@@ -21,14 +22,7 @@ export function Header({ lang }: { lang: Locale }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const searchResults = searchQuery.trim()
-    ? DEMO_PRODUCTS.filter(
-        (p) =>
-          p.name_es.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.name_en.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.material.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 5)
-    : [];
+  const searchResults: Product[] = [];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

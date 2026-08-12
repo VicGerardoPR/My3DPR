@@ -2,16 +2,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, Box, CheckCircle2, ShieldCheck, Truck, Star, Zap, Instagram } from 'lucide-react';
 import { Locale, getDictionary } from '@/lib/i18n';
-import { DEMO_CATEGORIES, DEMO_PRODUCTS, DEMO_BOX_TEMPLATES } from '@/lib/seed-data';
 import { ProductCard } from '@/components/shop/ProductCard';
+import { DataService } from '@/lib/supabase';
 
 export default async function HomePage({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
   const dict = getDictionary(lang);
 
-  const trendingProducts = DEMO_PRODUCTS.slice(0, 4);
-  const bestSellers = DEMO_PRODUCTS.filter((p) => p.is_best_seller).slice(0, 4);
-  const newDrops = DEMO_PRODUCTS.filter((p) => p.is_new).slice(0, 4);
+  const [products, categories] = await Promise.all([DataService.getProducts(), DataService.getCategories()]);
+  const trendingProducts = products.filter((p) => p.is_featured).slice(0, 4);
+  const bestSellers = products.filter((p) => p.is_best_seller).slice(0, 4);
 
   return (
     <div className="space-y-16 pb-16">
@@ -68,8 +68,8 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Loc
                 <p className="text-[11px] text-slate-400">Envíos PR & EE.UU.</p>
               </div>
               <div>
-                <span className="font-heading font-extrabold text-2xl text-brand-orange">4.9 ★</span>
-                <p className="text-[11px] text-slate-400">Reseñas de Clientes</p>
+                <span className="font-heading font-extrabold text-2xl text-brand-orange">PR</span>
+                <p className="text-[11px] text-slate-400">Hecho en Puerto Rico</p>
               </div>
             </div>
           </div>
@@ -86,16 +86,13 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Loc
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 p-4 bg-brand-dark-card/90 backdrop-blur-md rounded-2xl border border-brand-dark-border">
-                <span className="text-[10px] font-bold text-brand-cyan uppercase tracking-wider">
-                  MODELO DESTACADO DEL MES
-                </span>
+                <span className="text-[10px] font-bold text-brand-cyan uppercase tracking-wider">IMPRESIÓN 3D PERSONALIZADA</span>
                 <h3 className="font-heading font-extrabold text-lg text-slate-100">
-                  Dragón de Cristal Articulado (35cm)
+                  Convierte tu idea en una pieza 3D
                 </h3>
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-sm font-extrabold text-brand-cyan">$19.99 <span className="text-xs text-slate-500 line-through">$24.99</span></span>
-                  <Link href={`/${lang || 'es'}/product/dragon-cristal-articulado`} className="text-xs font-bold text-slate-950 bg-brand-cyan px-3 py-1.5 rounded-lg hover:bg-white transition-colors">
-                    Ver Detalles
+                  <Link href={`/${lang || 'es'}/custom`} className="text-xs font-bold text-slate-950 bg-brand-cyan px-3 py-1.5 rounded-lg hover:bg-white transition-colors">
+                    Solicitar cotización
                   </Link>
                 </div>
               </div>
@@ -120,7 +117,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Loc
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {DEMO_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <Link
               key={cat.id}
               href={`/${lang || 'es'}/shop?category=${cat.slug}`}

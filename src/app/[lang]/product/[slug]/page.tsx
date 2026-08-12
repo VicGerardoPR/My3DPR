@@ -1,37 +1,43 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+
 import { Star, ShoppingBag, Heart, ShieldCheck, Truck, Sparkles, Clock, Check, ChevronRight } from 'lucide-react';
 import { Locale, dictionaries } from '@/lib/i18n';
-import { DEMO_PRODUCTS } from '@/lib/seed-data';
-import { ProductVariant } from '@/types';
+import { Product, ProductVariant } from '@/types';
+import { DataService } from '@/lib/supabase';
 import { useCart } from '@/lib/cart-store';
 import { useWishlist } from '@/lib/wishlist-store';
 import { ProductCard } from '@/components/shop/ProductCard';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ lang: Locale; slug: string }> }) {
   const { lang, slug } = use(params);
-  const product = DEMO_PRODUCTS.find((p) => p.slug === slug);
-  if (!product) notFound();
-
   const { addItem } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
-
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
-    product.variants?.[0]
-  );
-  const [selectedImage, setSelectedImage] = useState<string>(
-    product.images?.[0]?.url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800'
-  );
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>();
+  const [selectedImage, setSelectedImage] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [customText, setCustomText] = useState('');
 
+  useEffect(() => {
+    void DataService.getProductBySlug(slug).then((value) => {
+      setProduct(value);
+      setSelectedVariant(value?.variants?.[0]);
+      setSelectedImage(value?.images?.[0]?.url || '');
+      setLoading(false);
+    });
+  }, [slug]);
+
+  if (loading) return <div className="container mx-auto px-4 py-16 text-center text-slate-400">Cargando producto…</div>;
+  if (!product) return <div className="container mx-auto px-4 py-16 text-center"><h1 className="text-2xl font-black text-slate-100">Producto no encontrado</h1><Link className="mt-4 inline-block text-brand-cyan" href={`/${lang}/shop`}>Volver a la tienda</Link></div>;
+
   const currentPrice = selectedVariant?.sale_price || selectedVariant?.price || product.sale_price || product.price;
 
-  const relatedProducts = DEMO_PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+  const relatedProducts: Product[] = [];
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
@@ -49,13 +55,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ lang: 
         {/* Image Gallery */}
         <div className="space-y-4">
           <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-brand-dark-card border border-brand-dark-border shadow-2xl">
-            <Image
+            {selectedImage ? <Image
               src={selectedImage}
               alt={product.name_es}
               fill
               className="object-cover"
               priority
-            />
+            /> : <div className="flex h-full items-center justify-center text-sm text-slate-500">Imagen no disponible</div>}
           </div>
 
           {/* Thumbnails */}

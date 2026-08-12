@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Papa from 'papaparse';
 import { Locale } from '@/lib/i18n';
-import { DEMO_PRODUCTS } from '@/lib/seed-data';
+
 import { Product } from '@/types';
 import type { FinancialKPIs } from '@/lib/auth';
 
@@ -84,7 +84,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ lang:
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [kpis, setKpis] = useState<FinancialKPIs | null>(null);
   const [loadingKpis, setLoadingKpis] = useState(true);
-  const [products] = useState<Product[]>(DEMO_PRODUCTS);
+  const [products] = useState<Product[]>([]);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<{ valid: ImportRow[]; errors: ImportError[] }>({ valid: [], errors: [] });
   const [adminName, setAdminName] = useState('Admin');
@@ -461,34 +461,9 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ lang:
         <div className="bg-brand-dark-card border border-brand-dark-border rounded-3xl p-6 space-y-4">
           <h3 className="font-heading font-bold text-slate-100 text-base">Cotizaciones Custom Studio</h3>
 
-          {/* Demo quote rows */}
-          {[
-            { id: 'REQ-3D-4821', name: 'Carlos Méndez', project: 'Figura personalizada Pokémon 15cm', status: 'QUOTED', budget: 85, date: '2026-08-07' },
-            { id: 'REQ-3D-4790', name: 'María Colón', project: 'Portanombre escritorio corporativo', status: 'SUBMITTED', budget: 45, date: '2026-08-06' },
-            { id: 'REQ-3D-4755', name: 'Jose Rodríguez', project: 'Logo empresa para montaje pared', status: 'IN_PRODUCTION', budget: 120, date: '2026-08-05' },
-            { id: 'REQ-3D-4712', name: 'Andrea Torres', project: 'Maqueta arquitectónica edificio', status: 'SUBMITTED', budget: 350, date: '2026-08-04' },
-          ].map((q) => (
-            <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-brand-dark border border-brand-dark-border rounded-2xl hover:border-brand-cyan/30 transition-colors">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-brand-cyan">{q.id}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    q.status === 'IN_PRODUCTION' ? 'bg-green-950/60 text-green-400' :
-                    q.status === 'QUOTED' ? 'bg-brand-cyan/20 text-brand-cyan' :
-                    'bg-amber-950/60 text-amber-400'
-                  }`}>{q.status}</span>
-                </div>
-                <p className="text-sm font-bold text-slate-200">{q.project}</p>
-                <p className="text-xs text-slate-400">{q.name} · {q.date}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-heading font-bold text-brand-orange">${q.budget}</span>
-                <button className="bg-brand-cyan text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-white transition-colors">
-                  Ver Detalles
-                </button>
-              </div>
-            </div>
-          ))}
+          <div className="rounded-2xl border border-brand-dark-border bg-brand-dark p-8 text-center text-sm text-slate-400">
+            No hay cotizaciones cargadas. Las solicitudes reales aparecerán aquí cuando el endpoint administrativo esté conectado.
+          </div>
         </div>
       )}
     </div>

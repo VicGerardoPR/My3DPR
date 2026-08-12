@@ -1,133 +1,107 @@
 'use client';
 
-import { useState, use } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Package, Clock, Heart, User, CheckCircle2, Truck, FileText, ChevronRight } from 'lucide-react';
+import { FormEvent, use, useEffect, useState } from 'react';
+import { LogIn, LogOut, Mail, Package, UserPlus } from 'lucide-react';
 import { Locale } from '@/lib/i18n';
-import { useWishlist } from '@/lib/wishlist-store';
-import { DEMO_PRODUCTS } from '@/lib/seed-data';
-import { ProductCard } from '@/components/shop/ProductCard';
+import type { PublicOrder } from '@/lib/account';
 
-const DEMO_ORDERS = [
-  {
-    id: 'ord-1',
-    order_number: 'MY3D-94821',
-    date: '2026-08-04',
-    status: 'IN_PRODUCTION',
-    total_amount: 34.98,
-    items: ['Dragón de Cristal Articulado (35cm)', 'Llavero 3D Personalizado'],
-    tracking_number: '9400111899560000000000',
-    carrier: 'USPS Priority',
-  },
-  {
-    id: 'ord-2',
-    order_number: 'MY3D-81204',
-    date: '2026-07-28',
-    status: 'DELIVERED',
-    total_amount: 29.99,
-    items: ['Soporte Mech para Control PS5'],
-    tracking_number: '9400111899561111111111',
-    carrier: 'USPS Priority',
-  }
-];
+type Mode = 'login' | 'signup' | 'guest';
 
 export default function AccountPage({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = use(params);
-  const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'orders';
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const isEnglish = lang === 'en';
+  const [mode, setMode] = useState<Mode>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [orders, setOrders] = useState<PublicOrder[]>([]);
+  const [accountEmail, setAccountEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { wishlistIds } = useWishlist();
-  const wishlistProducts = DEMO_PRODUCTS.filter((p) => wishlistIds.includes(p.id));
+  const loadOrders = async () => {
+    setLoading(true);
+    const response = await fetch('/api/account/orders', { cache: 'no-store' });
+    if (response.ok) {
+      const result = await response.json();
+      setOrders(result.orders || []);
+      setAccountEmail(result.email || null);
+    } else {
+      setOrders([]);
+      setAccountEmail(null);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { void loadOrders(); }, []);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setSubmitting(true); setError(null); setMessage(null);
+    const action = mode === 'guest' ? 'guest-link' : mode;
+    const response = await fetch('/api/account', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action, email, password, lang }),
+    });
+    const result = await response.json();
+    if (!response.ok) setError(result.error || (isEnglish ? 'The request failed.' : 'La solicitud falló.'));
+    else {
+      setMessage(result.message || (isEnglish ? 'Success.' : 'Operación completada.'));
+      if (result.authenticated) await loadOrders();
+    }
+    setSubmitting(false);
+  };
+
+  const logout = async () => {
+    await fetch('/api/account', { method: 'DELETE' });
+    setOrders([]); setAccountEmail(null); setMessage(null);
+  };
+
+  if (loading) return <div className="container mx-auto max-w-4xl px-4 py-16 text-center text-sm text-slate-400">{isEnglish ? 'Loading account…' : 'Cargando cuenta…'}</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-4 bg-brand-dark-card border border-brand-dark-border p-6 rounded-3xl">
-        <div className="w-16 h-16 rounded-2xl bg-brand-cyan/20 border border-brand-cyan text-brand-cyan flex items-center justify-center font-bold text-2xl">
-          <User className="w-8 h-8" />
-        </div>
-        <div>
-          <h1 className="font-heading font-black text-2xl text-slate-100">Mi Cuenta MY3D.PR</h1>
-          <p className="text-xs text-slate-400">Cliente Registrado • San Juan, Puerto Rico</p>
-        </div>
-      </div>
+    <div className="container mx-auto max-w-4xl px-4 py-10 space-y-8">
+      <header className="rounded-3xl border border-brand-dark-border bg-brand-dark-card p-6">
+        <h1 className="font-heading text-2xl font-black text-slate-100">{isEnglish ? 'My MY3D.PR Account' : 'Mi Cuenta MY3D.PR'}</h1>
+        <p className="mt-1 text-xs text-slate-400">{accountEmail || (isEnglish ? 'Sign in, create an account, or securely retrieve a guest purchase.' : 'Inicia sesión, crea una cuenta o recupera de forma segura una compra guest.')}</p>
+      </header>
 
-      {/* Tabs */}
-      <div className="flex border-b border-brand-dark-border gap-6 text-sm font-semibold text-slate-400">
-        <button
-          onClick={() => setActiveTab('orders')}
-          className={`pb-3 transition-colors flex items-center gap-2 ${
-            activeTab === 'orders' ? 'border-b-2 border-brand-cyan text-brand-cyan font-bold' : 'hover:text-slate-200'
-          }`}
-        >
-          <Package className="w-4 h-4" />
-          <span>Mis Órdenes ({DEMO_ORDERS.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('wishlist')}
-          className={`pb-3 transition-colors flex items-center gap-2 ${
-            activeTab === 'wishlist' ? 'border-b-2 border-brand-cyan text-brand-cyan font-bold' : 'hover:text-slate-200'
-          }`}
-        >
-          <Heart className="w-4 h-4" />
-          <span>Favoritos ({wishlistProducts.length})</span>
-        </button>
-      </div>
-
-      {/* Tab Contents */}
-      {activeTab === 'orders' && (
-        <div className="space-y-6">
-          {DEMO_ORDERS.map((ord) => (
-            <div key={ord.id} className="bg-brand-dark-card border border-brand-dark-border rounded-3xl p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-dark-border pb-4">
-                <div>
-                  <h3 className="font-heading font-bold text-base text-slate-100">{ord.order_number}</h3>
-                  <span className="text-xs text-slate-400">Fecha: {ord.date}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan px-3 py-1 rounded-full uppercase">
-                    {ord.status}
-                  </span>
-                  <span className="font-extrabold text-slate-100 text-sm">${ord.total_amount.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Status Timeline */}
-              <div className="pt-2">
-                <span className="text-xs font-semibold text-slate-300 block mb-3">Línea de Tiempo del Pedido:</span>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-                  <div className="p-2 bg-brand-dark rounded-xl border border-brand-cyan/40 text-brand-cyan font-bold">1. Recibido</div>
-                  <div className="p-2 bg-brand-dark rounded-xl border border-brand-cyan/40 text-brand-cyan font-bold">2. En Producción 3D</div>
-                  <div className="p-2 bg-brand-dark rounded-xl border border-brand-dark-border text-slate-500">3. Empacado</div>
-                  <div className="p-2 bg-brand-dark rounded-xl border border-brand-dark-border text-slate-500">4. Entregado</div>
-                </div>
-              </div>
-
-              <div className="text-xs text-slate-400 flex justify-between items-center pt-2">
-                <span>Rastreo: {ord.carrier} ({ord.tracking_number})</span>
-                <a href={`https://tools.usps.com/go/TrackConfirmAction?tLabels=${ord.tracking_number}`} target="_blank" rel="noreferrer" className="text-brand-cyan hover:underline font-bold">
-                  Ver en USPS.com →
-                </a>
-              </div>
+      {accountEmail ? (
+        <section className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-xl font-bold text-slate-100">{isEnglish ? `Orders (${orders.length})` : `Órdenes (${orders.length})`}</h2>
+            <button onClick={logout} className="flex items-center gap-2 rounded-xl border border-brand-dark-border px-4 py-2 text-xs font-bold text-slate-300"><LogOut className="h-4 w-4" />{isEnglish ? 'Sign out' : 'Cerrar sesión'}</button>
+          </div>
+          {orders.length === 0 ? (
+            <div className="rounded-3xl border border-brand-dark-border bg-brand-dark-card p-10 text-center">
+              <Package className="mx-auto h-9 w-9 text-brand-cyan" />
+              <p className="mt-3 text-sm text-slate-300">{isEnglish ? 'No purchases are associated with this verified email yet.' : 'Todavía no hay compras asociadas a este email verificado.'}</p>
             </div>
+          ) : orders.map((order) => (
+            <article key={order.order_number} className="rounded-3xl border border-brand-dark-border bg-brand-dark-card p-6 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div><h3 className="font-bold text-slate-100">{order.order_number}</h3><time className="text-xs text-slate-400">{new Date(order.created_at).toLocaleDateString(isEnglish ? 'en-US' : 'es-PR')}</time></div>
+                <div className="text-right"><span className="rounded-full bg-brand-cyan/15 px-3 py-1 text-xs font-bold text-brand-cyan">{order.status}</span><p className="mt-2 font-black text-slate-100">{new Intl.NumberFormat(isEnglish ? 'en-US' : 'es-PR', { style: 'currency', currency: order.currency }).format(order.total_amount)}</p></div>
+              </div>
+              <p className="text-xs text-slate-400">{isEnglish ? 'Payment' : 'Pago'}: {order.payment_status}</p>
+              {order.tracking_number && <a className="text-xs font-bold text-brand-cyan hover:underline" href={`https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(order.tracking_number)}`} target="_blank" rel="noreferrer">{order.carrier || 'Tracking'}: {order.tracking_number}</a>}
+            </article>
           ))}
-        </div>
-      )}
-
-      {activeTab === 'wishlist' && (
-        <div>
-          {wishlistProducts.length === 0 ? (
-            <p className="text-xs text-slate-400 text-center py-8">No tienes productos guardados en favoritos.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {wishlistProducts.map((p) => (
-                <ProductCard key={p.id} product={p} lang={lang} />
-              ))}
-            </div>
-          )}
-        </div>
+        </section>
+      ) : (
+        <section className="mx-auto max-w-lg rounded-3xl border border-brand-dark-border bg-brand-dark-card p-6 sm:p-8">
+          <div className="grid grid-cols-3 gap-2 mb-6">
+            {(['login','signup','guest'] as Mode[]).map((item) => <button key={item} onClick={() => { setMode(item); setError(null); setMessage(null); }} className={`rounded-xl px-2 py-2 text-xs font-bold ${mode === item ? 'bg-brand-cyan text-slate-950' : 'bg-brand-dark text-slate-300'}`}>{item === 'login' ? (isEnglish ? 'Sign in' : 'Entrar') : item === 'signup' ? (isEnglish ? 'Create account' : 'Crear cuenta') : 'Guest'}</button>)}
+          </div>
+          <form onSubmit={submit} className="space-y-4">
+            <label className="block text-xs font-semibold text-slate-300">Email<input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-xl border border-brand-dark-border bg-brand-dark px-3 py-3 text-slate-100" /></label>
+            {mode !== 'guest' && <label className="block text-xs font-semibold text-slate-300">{isEnglish ? 'Password' : 'Contraseña'}<input type="password" required minLength={10} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-xl border border-brand-dark-border bg-brand-dark px-3 py-3 text-slate-100" /><span className="mt-1 block text-[10px] text-slate-500">{isEnglish ? 'At least 10 characters, including letters and numbers.' : 'Mínimo 10 caracteres, incluyendo letras y números.'}</span></label>}
+            {mode === 'guest' && <p className="text-xs leading-relaxed text-slate-400">{isEnglish ? 'We will email you a secure link. Only after verifying the email can its guest purchases be viewed.' : 'Te enviaremos un enlace seguro. Solo después de verificar el email podrás ver sus compras guest.'}</p>}
+            <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-cyan py-3 text-xs font-black text-slate-950 disabled:opacity-50">{mode === 'guest' ? <Mail className="h-4 w-4" /> : mode === 'signup' ? <UserPlus className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}{submitting ? (isEnglish ? 'Processing…' : 'Procesando…') : mode === 'login' ? (isEnglish ? 'SIGN IN' : 'INICIAR SESIÓN') : mode === 'signup' ? (isEnglish ? 'CREATE ACCOUNT' : 'CREAR CUENTA') : (isEnglish ? 'SEND SECURE LINK' : 'ENVIAR ENLACE SEGURO')}</button>
+            {message && <p role="status" className="text-xs text-green-400">{message}</p>}{error && <p role="alert" className="text-xs text-red-400">{error}</p>}
+          </form>
+        </section>
       )}
     </div>
   );
