@@ -2,8 +2,8 @@
 
 import { useState, useMemo, use, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { SlidersHorizontal, Search, X, Check, Grid, List } from 'lucide-react';
-import { Locale, dictionaries } from '@/lib/i18n';
+import { SlidersHorizontal } from 'lucide-react';
+import { Locale } from '@/lib/i18n';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { DataService } from '@/lib/supabase';
 import type { Category, Product } from '@/types';
@@ -20,7 +20,7 @@ export default function ShopPage({ params }: { params: Promise<{ lang: Locale }>
   const [selectedMaterial, setSelectedMaterial] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [, setMobileFilterOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 

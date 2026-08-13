@@ -27,6 +27,8 @@ export class PaymentAdapter {
   }
 
   private static async processStripe(order: Order, _token?: string): Promise<PaymentProcessResult> {
+    void order;
+    void _token;
     return {
       success: false,
       errorMessage: 'Stripe no está configurado. No se procesó ningún pago.',
@@ -34,6 +36,7 @@ export class PaymentAdapter {
   }
 
   private static async processPayPal(order: Order): Promise<PaymentProcessResult> {
+    void order;
     return {
       success: false,
       errorMessage: 'PayPal no está configurado. No se procesó ningún pago.',
@@ -41,10 +44,11 @@ export class PaymentAdapter {
   }
 
   private static async processATHMovil(order: Order, phone?: string): Promise<PaymentProcessResult> {
-    const athPhoneConfig = process.env.ATH_MOBILE_PHONE || '787-000-0000';
+    void order;
+    void phone;
     return {
       success: false,
-      instructions: `Por favor completa tu pago por $${order.total_amount.toFixed(2)} en la app de ATH Móvil -> Negocios -> MY3D PR o envía el pago al teléfono ${athPhoneConfig} incluyendo la orden #${order.order_number} en el mensaje.`,
+      errorMessage: 'ATH Móvil no está configurado. No se procesó ningún pago.',
     };
   }
 }

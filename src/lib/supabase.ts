@@ -42,10 +42,12 @@ export class DataService {
   }
 
   static async createCustomRequest(req: Partial<CustomRequest>): Promise<{ success: boolean; request_number: string }> {
+    void req;
     throw new Error('Use /api/custom-quotes for server-side quote creation.');
   }
 
   static async createOrder(orderData: Partial<Order>): Promise<{ success: boolean; order_number: string }> {
+    void orderData;
     throw new Error('Use /api/checkout for server-side order creation.');
   }
 }

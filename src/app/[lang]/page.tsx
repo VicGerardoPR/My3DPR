@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Sparkles, Box, CheckCircle2, ShieldCheck, Truck, Star, Zap } from 'lucide-react';
+import { ArrowRight, Sparkles, Box, Zap } from 'lucide-react';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { DataService } from '@/lib/supabase';

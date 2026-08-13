@@ -3,9 +3,9 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  DollarSign, ShoppingBag, Package, Upload, Users,
-  TrendingUp, TrendingDown, AlertTriangle, LogOut,
-  ShieldCheck, Clock, Zap, Star, BarChart3, FileText,
+  DollarSign, ShoppingBag, Upload,
+  TrendingUp, AlertTriangle, LogOut,
+  ShieldCheck, Star, BarChart3, FileText,
   Plus, RefreshCw, CheckCircle2, ArrowUpRight, ArrowDownRight,
   CreditCard, Smartphone, Loader2,
 } from 'lucide-react';

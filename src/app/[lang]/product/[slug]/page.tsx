@@ -4,8 +4,8 @@ import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Star, ShoppingBag, Heart, ShieldCheck, Truck, Sparkles, Clock, Check, ChevronRight } from 'lucide-react';
-import { Locale, dictionaries } from '@/lib/i18n';
+import { Star, ShoppingBag, Heart, Sparkles, ChevronRight } from 'lucide-react';
+import { Locale } from '@/lib/i18n';
 import { Product, ProductVariant } from '@/types';
 import { DataService } from '@/lib/supabase';
 import { useCart } from '@/lib/cart-store';
@@ -20,7 +20,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ lang: 
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>();
   const [selectedImage, setSelectedImage] = useState<string>('');
-  const [quantity, setQuantity] = useState(1);
+  const quantity = 1;
   const [customText, setCustomText] = useState('');
 
   useEffect(() => {

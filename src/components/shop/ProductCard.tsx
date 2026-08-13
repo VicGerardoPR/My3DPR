@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, ShoppingBag, Eye, Star, Sparkles, Clock, CheckCircle } from 'lucide-react';
+import { Heart, ShoppingBag, Eye, Star, Clock, CheckCircle } from 'lucide-react';
 import { Product } from '@/types';
 import { Locale } from '@/lib/i18n';
 import { useCart } from '@/lib/cart-store';
@@ -17,7 +17,7 @@ export function ProductCard({ product, lang }: { product: Product; lang: Locale 
 
   const isFavorite = isInWishlist(product.id);
   const primaryImg = product.images?.find((i) => i.is_primary)?.url || product.images?.[0]?.url || '/images/product-placeholder.svg';
-  const secondaryImg = product.images?.[1]?.url || primaryImg;
+
 
   const currentPrice = product.sale_price || product.price;
   const isSale = !!product.sale_price && product.sale_price < product.price;

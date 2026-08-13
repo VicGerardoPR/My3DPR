@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { X, Star, ShoppingBag, Heart, Sparkles, Check } from 'lucide-react';
+import { X, ShoppingBag, Heart, Sparkles } from 'lucide-react';
 import { Product, ProductVariant } from '@/types';
 import { Locale } from '@/lib/i18n';
 import { useCart } from '@/lib/cart-store';

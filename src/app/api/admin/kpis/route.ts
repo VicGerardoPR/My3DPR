@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const kpis = await getFinancialKPIs();
     return NextResponse.json(kpis);
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Error fetching KPIs' }, { status: 500 });
   }
 }

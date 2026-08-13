@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, use } from 'react';
-import { Upload, Sparkles, CheckCircle, FileCode, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Upload, Sparkles, CheckCircle, FileCode } from 'lucide-react';
 import { Locale, dictionaries } from '@/lib/i18n';
 
 

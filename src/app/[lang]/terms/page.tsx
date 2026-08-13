@@ -1,7 +1,4 @@
-import { Locale } from '@/lib/i18n';
-
-export default async function TermsPage({ params }: { params: Promise<{ lang: Locale }> }) {
-  const { lang } = await params;
+export default function TermsPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl space-y-6 text-slate-300 text-sm leading-relaxed">
       <h1 className="font-heading font-black text-3xl text-slate-100">Términos y Condiciones de Servicio</h1>
