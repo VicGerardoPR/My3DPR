@@ -16,7 +16,6 @@ export function CartDrawer({ lang }: { lang: Locale }) {
     removeItem,
     subtotal,
     discount,
-    shippingCost,
     total,
     isFreeShipping,
     freeShippingNeeded,
@@ -207,11 +206,11 @@ export function CartDrawer({ lang }: { lang: Locale }) {
 
                 <div className="flex justify-between">
                   <span>{lang === 'es' ? 'Envío Estimado' : 'Est. Shipping'}</span>
-                  <span className="font-semibold">{isFreeShipping ? <span className="text-green-400 font-bold">GRATIS</span> : `$${shippingCost.toFixed(2)}`}</span>
+                  <span className="font-semibold">{isFreeShipping ? <span className="text-green-400 font-bold">Elegible para envío gratis</span> : 'Calculado en checkout'}</span>
                 </div>
 
                 <div className="flex justify-between text-sm font-extrabold text-slate-100 pt-2 border-t border-brand-dark-border">
-                  <span>Total</span>
+                  <span>Subtotal estimado</span>
                   <span className="text-brand-cyan">${total.toFixed(2)}</span>
                 </div>
               </div>

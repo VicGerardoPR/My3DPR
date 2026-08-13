@@ -126,9 +126,11 @@ function useCartState() {
   }
 
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD || appliedCoupon?.discount_type === 'FREE_SHIPPING';
-  const shippingCost = subtotal > 0 ? (isFreeShipping ? 0 : 4.99) : 0;
-  const estimatedTax = (subtotal - discount) * 0.115; // 11.5% IVU PR default
-  const total = Math.max(0, subtotal - discount + shippingCost + estimatedTax);
+  // Browser values are display-only. Shipping, tax and final total are
+  // calculated from trusted catalog/configuration by the checkout RPC.
+  const shippingCost = 0;
+  const estimatedTax = 0;
+  const total = Math.max(0, subtotal - discount);
 
   const itemCount = items.reduce((acc, i) => acc + i.quantity, 0);
 

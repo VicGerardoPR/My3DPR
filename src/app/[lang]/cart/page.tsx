@@ -4,9 +4,9 @@ import { use } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag, ArrowRight, Trash2, Plus, Minus, Tag, Sparkles } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Trash2, Plus, Minus } from 'lucide-react';
 import { Locale } from '@/lib/i18n';
-import { useCart, FREE_SHIPPING_THRESHOLD } from '@/lib/cart-store';
+import { useCart } from '@/lib/cart-store';
 
 export default function CartPage({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = use(params);
@@ -16,11 +16,8 @@ export default function CartPage({ params }: { params: Promise<{ lang: Locale }>
     removeItem,
     subtotal,
     discount,
-    shippingCost,
-    estimatedTax,
     total,
     isFreeShipping,
-    freeShippingNeeded,
   } = useCart();
 
   return (
@@ -88,10 +85,10 @@ export default function CartPage({ params }: { params: Promise<{ lang: Locale }>
             <div className="space-y-2 text-xs text-slate-300">
               <div className="flex justify-between"><span>Subtotal</span><span className="font-semibold text-slate-200">${subtotal.toFixed(2)}</span></div>
               {discount > 0 && <div className="flex justify-between text-green-400"><span>Descuento</span><span>-${discount.toFixed(2)}</span></div>}
-              <div className="flex justify-between"><span>Envío (PR & USA)</span><span className="font-semibold">{isFreeShipping ? 'GRATIS' : `$${shippingCost.toFixed(2)}`}</span></div>
-              <div className="flex justify-between"><span>IVU / Impuestos (11.5%)</span><span className="font-semibold">${estimatedTax.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Envío</span><span className="font-semibold">{isFreeShipping ? 'Elegible para envío gratis' : 'Calculado al confirmar'}</span></div>
+              <div className="flex justify-between"><span>Impuestos</span><span className="font-semibold">Calculados por el servidor</span></div>
               <div className="flex justify-between text-sm font-extrabold text-slate-100 pt-3 border-t border-brand-dark-border">
-                <span>Total Final</span>
+                <span>Subtotal estimado</span>
                 <span className="text-brand-cyan">${total.toFixed(2)}</span>
               </div>
             </div>

@@ -1,9 +1,7 @@
 'use client';
 
 import { use, useRef, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ShieldCheck, CreditCard, CheckCircle, Lock, ArrowRight, Truck } from 'lucide-react';
 import { Locale } from '@/lib/i18n';
 import { useCart } from '@/lib/cart-store';
@@ -11,11 +9,10 @@ import { useCart } from '@/lib/cart-store';
 
 export default function CheckoutPage({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = use(params);
-  const router = useRouter();
-  const { items, subtotal, discount, shippingCost, estimatedTax, total, clearCart } = useCart();
+  const { items, subtotal, clearCart } = useCart();
 
   const paymentMethod = 'ATH_MOVIL' as const;
-  const [athPhone, setAthPhone] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [completedOrderNumber, setCompletedOrderNumber] = useState<string | null>(null);
   const [athInstructions, setAthInstructions] = useState<string | null>(null);
@@ -84,9 +81,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ lang: Local
             </div>
           )}
 
-          <p className="text-xs text-slate-400">
-            Te hemos enviado un correo de confirmación a <span className="text-slate-200 font-semibold">{shippingAddress.email}</span>. Puedes darle seguimiento desde tu panel de cuenta.
-          </p>
+          <p className="text-xs text-slate-400">Guarda el número de orden. Puedes vincularla y darle seguimiento verificando <span className="text-slate-200 font-semibold">{shippingAddress.email}</span> desde Mi Cuenta.</p>
 
           <Link
             href={`/${lang}/account`}
@@ -204,19 +199,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ lang: Local
               </div>
             </div>
 
-            {paymentMethod === 'ATH_MOVIL' && (
-              <div className="p-4 bg-brand-dark rounded-2xl border border-brand-cyan/30 text-xs space-y-2">
-                <span className="font-bold text-brand-cyan block">Pago por ATH Móvil Negocios:</span>
-                <p className="text-slate-300">Ingresa tu número de teléfono registrado en ATH Móvil para enviar la solicitud de transferencia:</p>
-                <input
-                  type="text"
-                  placeholder="787-000-0000"
-                  value={athPhone}
-                  onChange={(e) => setAthPhone(e.target.value)}
-                  className="w-full bg-brand-dark-card border border-brand-dark-border text-slate-200 rounded-xl px-3 py-2"
-                />
-              </div>
-            )}
+            <p className="rounded-2xl border border-brand-cyan/30 bg-brand-dark p-4 text-xs text-slate-300">Las instrucciones y el importe final se generan por el servidor después de validar precios, inventario, envío e impuestos.</p>
           </div>
         </div>
 
@@ -226,12 +209,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ lang: Local
 
           <div className="space-y-2 text-xs text-slate-300">
             <div className="flex justify-between"><span>Subtotal</span><span className="font-semibold">${subtotal.toFixed(2)}</span></div>
-            {discount > 0 && <div className="flex justify-between text-green-400"><span>Descuento</span><span>-${discount.toFixed(2)}</span></div>}
-            <div className="flex justify-between"><span>Envío</span><span className="font-semibold">${shippingCost.toFixed(2)}</span></div>
-            <div className="flex justify-between"><span>IVU (11.5%)</span><span className="font-semibold">${estimatedTax.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span>Envío</span><span className="font-semibold">Calculado al confirmar</span></div>
+            <div className="flex justify-between"><span>Impuestos</span><span className="font-semibold">Calculados al confirmar</span></div>
             <div className="flex justify-between text-base font-black text-slate-100 pt-3 border-t border-brand-dark-border">
-              <span>Total Pagar</span>
-              <span className="text-brand-cyan">${total.toFixed(2)}</span>
+              <span>Subtotal estimado</span>
+              <span className="text-brand-cyan">${subtotal.toFixed(2)}</span>
             </div>
           </div>
 
