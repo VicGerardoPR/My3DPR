@@ -47,7 +47,7 @@ export default function CartPage({ params }: { params: Promise<{ lang: Locale }>
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => {
               const itemPrice = item.variant?.sale_price || item.variant?.price || item.product.sale_price || item.product.price;
-              const primaryImg = item.product.images?.[0]?.url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400';
+              const primaryImg = item.product.images?.[0]?.url || '/images/product-placeholder.svg';
 
               return (
                 <div key={item.id} className="bg-brand-dark-card border border-brand-dark-border rounded-2xl p-4 flex gap-4 items-center">

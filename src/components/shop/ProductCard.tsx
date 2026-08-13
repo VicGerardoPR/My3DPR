@@ -16,7 +16,7 @@ export function ProductCard({ product, lang }: { product: Product; lang: Locale 
   const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   const isFavorite = isInWishlist(product.id);
-  const primaryImg = product.images?.find((i) => i.is_primary)?.url || product.images?.[0]?.url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=600';
+  const primaryImg = product.images?.find((i) => i.is_primary)?.url || product.images?.[0]?.url || '/images/product-placeholder.svg';
   const secondaryImg = product.images?.[1]?.url || primaryImg;
 
   const currentPrice = product.sale_price || product.price;

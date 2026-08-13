@@ -25,7 +25,7 @@ export function QuickViewModal({
   );
   const [customText, setCustomText] = useState('');
 
-  const primaryImg = product.images?.find((i) => i.is_primary)?.url || product.images?.[0]?.url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=600';
+  const primaryImg = product.images?.find((i) => i.is_primary)?.url || product.images?.[0]?.url || '/images/product-placeholder.svg';
   const price = selectedVariant?.sale_price || selectedVariant?.price || product.sale_price || product.price;
 
   const handleAddToCart = () => {

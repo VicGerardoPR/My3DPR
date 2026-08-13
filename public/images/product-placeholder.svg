@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">Imagen de producto no disponible</title>
+  <desc id="desc">Marcador neutral de MY3D.PR</desc>
+  <rect width="800" height="800" fill="#0f172a"/>
+  <rect x="80" y="80" width="640" height="640" rx="64" fill="#111827" stroke="#334155" stroke-width="8"/>
+  <path d="M400 205 555 295v180L400 565 245 475V295z" fill="none" stroke="#22d3ee" stroke-width="18" stroke-linejoin="round"/>
+  <path d="m245 295 155 90 155-90M400 385v180" fill="none" stroke="#f97316" stroke-width="14" stroke-linejoin="round"/>
+  <text x="400" y="655" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="28">MY3D.PR</text>
+</svg>

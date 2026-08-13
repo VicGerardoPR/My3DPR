@@ -102,7 +102,7 @@ export function CartDrawer({ lang }: { lang: Locale }) {
             ) : (
               items.map((item) => {
                 const itemPrice = item.variant?.sale_price || item.variant?.price || item.product.sale_price || item.product.price;
-                const primaryImg = item.product.images?.find((i) => i.is_primary)?.url || item.product.images?.[0]?.url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400';
+                const primaryImg = item.product.images?.find((i) => i.is_primary)?.url || item.product.images?.[0]?.url || '/images/product-placeholder.svg';
 
                 return (
                   <div key={item.id} className="bg-brand-dark-card border border-brand-dark-border rounded-xl p-3 flex gap-3 relative group">

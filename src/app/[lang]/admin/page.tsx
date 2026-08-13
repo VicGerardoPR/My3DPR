@@ -434,12 +434,9 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ lang:
                   )}
                 </div>
                 {importPreview.valid.length > 0 && (
-                  <button
-                    onClick={() => { alert(`¡${importPreview.valid.length} productos importados!`); setImportFile(null); setImportPreview({ valid: [], errors: [] }); }}
-                    className="bg-green-500 text-slate-950 px-4 py-2 rounded-xl font-bold hover:bg-green-400 transition-colors"
-                  >
-                    Confirmar Importación
-                  </button>
+                  <p className="rounded-xl border border-amber-800/40 bg-amber-950/30 px-4 py-3 text-xs text-amber-300">
+                    Vista previa solamente. La importación permanece deshabilitada hasta conectar un endpoint administrativo transaccional.
+                  </p>
                 )}
               </div>
 

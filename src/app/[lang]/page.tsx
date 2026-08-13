@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Sparkles, Box, CheckCircle2, ShieldCheck, Truck, Star, Zap, Instagram } from 'lucide-react';
+import { ArrowRight, Sparkles, Box, CheckCircle2, ShieldCheck, Truck, Star, Zap } from 'lucide-react';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { DataService } from '@/lib/supabase';
@@ -229,41 +229,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Loc
         </div>
       </section>
 
-      {/* INSTAGRAM GRID */}
-      <section className="container mx-auto px-4 text-center space-y-6">
-        <div>
-          <span className="text-xs font-bold text-brand-orange uppercase tracking-wider flex items-center justify-center gap-1.5">
-            <Instagram className="w-4 h-4" />
-            SÍGUENOS EN INSTAGRAM @MY3D.PR
-          </span>
-          <h2 className="font-heading font-black text-2xl sm:text-3xl text-slate-100 mt-1">
-            NUESTRA COMUNIDAD 3D EN ACCIÓN
-          </h2>
-        </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            '/images/dragon.jpg',
-            '/images/mech.jpg',
-            '/images/planter.jpg',
-            '/images/keychains.jpg',
-          ].map((url, idx) => (
-            <a
-              key={idx}
-              href="https://instagram.com/my3d.pr"
-              target="_blank"
-              rel="noreferrer"
-              className="relative aspect-square rounded-2xl overflow-hidden border border-brand-dark-border group"
-            >
-              <Image src={url} alt="Instagram Post 3D Print" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-xs gap-1">
-                <Instagram className="w-4 h-4" />
-                <span>@my3d.pr</span>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
