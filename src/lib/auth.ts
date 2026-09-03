@@ -1,4 +1,6 @@
+import 'server-only';
 import { createClient } from '@supabase/supabase-js';
+import type { AdminRole } from './admin-permissions';
 
 // ── Supabase client with service role (server-side only) ─────────────────────
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -29,7 +31,7 @@ const getAdminClient = () => {
 export async function validateAdminLogin(
   email: string,
   password: string
-): Promise<{ success: boolean; name?: string; role?: string; error?: string }> {
+): Promise<{ success: boolean; name?: string; role?: AdminRole; userId?: string; sessionVersion?: number; error?: string }> {
   const authClient = getAuthClient();
   const adminClient = getAdminClient();
 
@@ -48,17 +50,18 @@ export async function validateAdminLogin(
       // 2. Verify email is in admin_whitelist (using service role to bypass RLS)
       const { data: whitelist, error: wlError } = await adminClient
         .from('admin_whitelist')
-        .select('role, full_name, active')
+        .select('role, full_name, active, user_id, session_version')
         .eq('email', email.toLowerCase().trim())
         .eq('active', true)
         .single();
 
-      if (wlError || !whitelist) {
+      if (wlError || !whitelist || whitelist.user_id !== data.user.id) {
         await authClient.auth.signOut();
         return { success: false, error: 'No tienes acceso al panel administrativo. Contacta al administrador.' };
       }
 
-      return { success: true, name: whitelist.full_name, role: whitelist.role };
+      await adminClient.from('admin_whitelist').update({ last_login_at: new Date().toISOString() }).eq('email', email.toLowerCase().trim());
+      return { success: true, name: whitelist.full_name, role: whitelist.role as AdminRole, userId: data.user.id, sessionVersion: whitelist.session_version };
     } catch (err) {
       console.error('Supabase auth error:', err);
       return { success: false, error: 'No fue posible validar la sesión administrativa.' };

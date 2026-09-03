@@ -9,7 +9,10 @@ export default function AdminLoginPage({ params }: { params: Promise<{ lang: Loc
   const { lang } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || `/${lang}/admin`;
+  const requestedRedirect = searchParams.get('redirect');
+  const redirect = requestedRedirect && /^\/(es|en)\/admin(?:\/|$)/.test(requestedRedirect)
+    ? requestedRedirect
+    : `/${lang}/admin`;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

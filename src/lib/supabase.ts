@@ -11,7 +11,7 @@ export const supabase = (supabaseUrl && supabaseAnonKey && !supabaseUrl.includes
 export class DataService {
   static async getProducts(): Promise<Product[]> {
     if (supabase) {
-      const { data, error } = await supabase.from('products').select('*, categories(*), product_images(*)');
+      const { data, error } = await supabase.from('products').select('*, category:categories(*), images:product_images(*), variants:product_variants(*)');
       if (!error && data && data.length > 0) return data as Product[];
     }
     return [];
@@ -19,7 +19,7 @@ export class DataService {
 
   static async getProductBySlug(slug: string): Promise<Product | null> {
     if (supabase) {
-      const { data, error } = await supabase.from('products').select('*, categories(*), product_images(*), product_variants(*)').eq('slug', slug).single();
+      const { data, error } = await supabase.from('products').select('*, category:categories(*), images:product_images(*), variants:product_variants(*)').eq('slug', slug).single();
       if (!error && data) return data as Product;
     }
     return null;

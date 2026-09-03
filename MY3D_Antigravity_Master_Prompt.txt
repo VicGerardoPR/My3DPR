@@ -38,7 +38,7 @@ STACK RECOMENDADO
 - Supabase Auth, Storage y Row Level Security
 - Stripe
 - PayPal
-- ATH Móvil, mediante integración oficial/configurable cuando existan credenciales
+- PayPal Checkout mediante integración oficial/configurable cuando existan credenciales
 - Arquitectura de shipping preparada para Shippo o EasyPost
 - Resend para email
 - GA4 + Meta Pixel
@@ -178,9 +178,8 @@ Después de compra guest, ofrecer crear cuenta para tracking.
 PAGOS
 Diseña una payment abstraction layer.
 Stripe: Visa, Mastercard, Amex, Discover cuando aplique, Apple Pay y Google Pay.
-PayPal.
-ATH Móvil.
-No inventes integración ATH Móvil: prepara adapter/configuración segura y documenta lo pendiente hasta disponer de API/credenciales oficiales.
+PayPal Checkout.
+No inventes integraciones de pago: usa configuración segura y documenta lo pendiente hasta disponer de API/credenciales oficiales.
 Nunca almacenes tarjeta completa ni CVV.
 Valida firmas de webhooks y procesa webhooks de manera idempotente.
 
@@ -348,7 +347,7 @@ GA4 + Meta Pixel.
 Eventos: view_item, search, add_to_cart, remove_from_cart, view_cart, begin_checkout, add_payment_info, purchase, sign_up, login, add_to_wishlist, build_box_started, build_box_completed, custom_request_submitted, quote_accepted.
 
 ADMIN SETTINGS
-Store, email, phone, address, currency, language, PR/USA shipping, free shipping threshold, Stripe, PayPal, ATH Móvil, Instagram, Facebook, TikTok, WhatsApp, SEO y feature toggles para Build Your Box, Reviews, Wishlist, Custom Studio y Newsletter.
+Store, email, phone, address, currency, language, PR/USA shipping, free shipping threshold, Stripe, PayPal, Instagram, Facebook, TikTok, WhatsApp, SEO y feature toggles para Build Your Box, Reviews, Wishlist, Custom Studio y Newsletter.
 
 DESIGN DETAILS
 Cards con rounded corners, subtle borders y premium shadows.
@@ -400,7 +399,7 @@ STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
 PAYPAL_CLIENT_ID
 PAYPAL_CLIENT_SECRET
-ATH_MOBILE_*
+PAYPAL_WEBHOOK_ID
 RESEND_API_KEY
 INSTAGRAM_*
 GA_MEASUREMENT_ID
@@ -409,7 +408,7 @@ META_PIXEL_ID
 Nunca subir secretos reales a Git.
 
 README
-Documenta instalación, desarrollo, Supabase, database, env vars, Stripe, PayPal, ATH Móvil, shipping, email, Instagram, deployment, domain, admin y CSV/XLSX import.
+Documenta instalación, desarrollo, Supabase, database, env vars, Stripe, PayPal, shipping, email, Instagram, deployment, domain, admin y CSV/XLSX import.
 
 ESTRATEGIA DE DESARROLLO
 No construyas todo superficialmente en un solo paso.

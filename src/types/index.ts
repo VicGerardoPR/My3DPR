@@ -1,4 +1,4 @@
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'FULFILLMENT' | 'CUSTOMER';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CATALOG_MANAGER' | 'QUOTE_MANAGER' | 'CUSTOMER';
 
 export interface UserProfile {
   id: string;
@@ -123,8 +123,8 @@ export type OrderStatus =
   | 'DELIVERED'
   | 'CANCELLED';
 
-export type PaymentMethod = 'STRIPE' | 'PAYPAL' | 'ATH_MOVIL';
-export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+export type PaymentMethod = 'STRIPE' | 'PAYPAL';
+export type PaymentStatus = 'PENDING' | 'PAID' | 'PARTIALLY_REFUNDED' | 'FAILED' | 'REFUNDED';
 
 export interface Address {
   full_name: string;

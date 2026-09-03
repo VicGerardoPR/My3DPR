@@ -8,7 +8,7 @@ Plataforma e-commerce completa y lista para producción desarrollada para **MY3D
 - **Experiencia Build-a-Box**: Creador interactivo por pasos para cajas combos de 5 y 10 productos con descuento dinámico del 15% al 25% y validación de cajas incompletas.
 - **MY3D Custom Studio**: Formulario para carga de modelos 3D (`.STL`, `.3MF`, `.OBJ`, `.ZIP`) con validación de extensiones y flujo de cotizaciones.
 - **Bilingüe Nativo (ES / EN)**: Soporte completo en Español como predeterminado e Inglés sin duplicación de páginas.
-- **Abstracción de Pagos**: Capa de pago preparada para **Stripe** (Tarjetas, Apple Pay, Google Pay), **PayPal** y **ATH Móvil** (Instrucciones oficiales + integración de negocios PR).
+- **Pagos verificados**: **Stripe Checkout** para tarjetas, Apple Pay y Google Pay compatibles, más **PayPal Checkout** separado. Las órdenes se actualizan mediante captura server-side, webhooks firmados, eventos idempotentes y reconciliación de reservas expiradas.
 - **Envíos Puerto Rico & EE.UU.**: Reglas de envío calculadas por peso/región con umbral administrable de Envío Gratis ($50+ USD).
 - **Panel Administrativo (RBAC)**: Gestión de catálogo, KPIs en tiempo real, cotizaciones custom e **Importación Masiva vía CSV / XLSX** con previsualización y reporte de errores.
 

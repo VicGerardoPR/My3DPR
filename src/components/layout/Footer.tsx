@@ -29,7 +29,7 @@ export function Footer({ lang }: { lang: Locale }) {
             </div>
             <div>
               <h4 className="font-semibold text-slate-200 text-base">{lang === 'en' ? '100% Secure Checkout' : 'Pagos Seguros'}</h4>
-              <p className="text-xs text-slate-400">ATH Móvil con verificación manual</p>
+              <p className="text-xs text-slate-400">{lang === 'en' ? 'Stripe and PayPal provider verification' : 'Verificación mediante Stripe y PayPal'}</p>
             </div>
           </div>
 
@@ -150,7 +150,8 @@ export function Footer({ lang }: { lang: Locale }) {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} MY3D.PR. {dict.rights}</p>
           <div className="flex items-center gap-3 font-semibold text-slate-400">
-            <span className="px-2 py-1 bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan rounded text-[10px] font-bold">ATH MÓVIL</span>
+            <span className="px-2 py-1 bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan rounded text-[10px] font-bold">STRIPE</span>
+            <span className="px-2 py-1 bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan rounded text-[10px] font-bold">PAYPAL</span>
           </div>
         </div>
       </div>

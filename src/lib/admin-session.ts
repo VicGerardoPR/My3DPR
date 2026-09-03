@@ -1,7 +1,18 @@
+import { isAdminRole, type AdminRole } from './admin-permissions';
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-type AdminSession = { email: string; role: string; exp: number };
+export type AdminSession = {
+  version: 1;
+  userId: string;
+  email: string;
+  role: AdminRole;
+  sessionVersion: number;
+  exp: number;
+};
+
+type AdminSessionInput = Omit<AdminSession, 'version' | 'exp'>;
 
 function bytesToBase64Url(bytes: Uint8Array) {
   let binary = '';
@@ -20,18 +31,14 @@ async function sign(payload: string, secret: string) {
   return bytesToBase64Url(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(payload))));
 }
 
-export async function createAdminSession(
-  admin: { email: string; role: string },
-  secret: string,
-  lifetimeSeconds = 60 * 60 * 8,
-) {
-  if (secret.length < 8) throw new Error('ADMIN_SESSION_SECRET must contain at least 8 characters.');
-  const payload = bytesToBase64Url(encoder.encode(JSON.stringify({ ...admin, exp: Math.floor(Date.now() / 1000) + lifetimeSeconds })));
+export async function createAdminSession(admin: AdminSessionInput, secret: string, lifetimeSeconds = 60 * 60 * 8) {
+  if (secret.length < 32) throw new Error('ADMIN_SESSION_SECRET must contain at least 32 characters.');
+  const payload = bytesToBase64Url(encoder.encode(JSON.stringify({ version: 1, ...admin, exp: Math.floor(Date.now() / 1000) + lifetimeSeconds })));
   return `${payload}.${await sign(payload, secret)}`;
 }
 
 export async function verifyAdminSession(token: string | undefined, secret: string): Promise<AdminSession | null> {
-  if (!token || !secret) return null;
+  if (!token || secret.length < 32) return null;
   const [payload, signature, extra] = token.split('.');
   if (!payload || !signature || extra) return null;
   const expected = await sign(payload, secret);
@@ -40,9 +47,9 @@ export async function verifyAdminSession(token: string | undefined, secret: stri
   for (let index = 0; index < signature.length; index += 1) difference |= signature.charCodeAt(index) ^ expected.charCodeAt(index);
   if (difference !== 0) return null;
   try {
-    const session = JSON.parse(decoder.decode(base64UrlToBytes(payload))) as AdminSession;
-    if (!session.email || !session.role || session.exp <= Math.floor(Date.now() / 1000)) return null;
-    return session;
+    const session = JSON.parse(decoder.decode(base64UrlToBytes(payload))) as Partial<AdminSession>;
+    if (session.version !== 1 || !session.userId || !session.email || !isAdminRole(session.role) || !Number.isInteger(session.sessionVersion) || (session.sessionVersion ?? -1) < 1 || !session.exp || session.exp <= Math.floor(Date.now() / 1000)) return null;
+    return session as AdminSession;
   } catch {
     return null;
   }

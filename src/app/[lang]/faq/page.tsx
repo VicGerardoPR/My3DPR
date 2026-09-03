@@ -5,8 +5,8 @@ export default function FAQPage() {
       a: 'Para artículos listos para envío (Ready to Ship), el pedido se despacha en 24h y llega en 1-3 días laborables por USPS.'
     },
     {
-      q: '¿Puedo pagar por ATH Móvil?',
-      a: '¡Sí! Aceptamos ATH Móvil en el checkout. Solo selecciona ATH Móvil como método de pago y sigue las instrucciones para enviar la transferencia.'
+      q: '¿Qué métodos de pago aceptan?',
+      a: 'Stripe Checkout permite tarjetas, Apple Pay y Google Pay cuando el dispositivo y la cuenta son compatibles. PayPal se procesa por separado mediante PayPal Checkout.'
     },
     {
       q: '¿Cómo puedo enviar mi propio diseño 3D para imprimir?',
