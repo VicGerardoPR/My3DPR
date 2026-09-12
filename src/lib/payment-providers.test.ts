@@ -68,9 +68,9 @@ describe('provider configuration and payloads', () => {
     expect(buildPayPalRequestId(orderId).length).toBeLessThanOrEqual(38);
   });
 
-  it('selects only explicit PayPal sandbox or live API origins', () => {
+  it('selects only the explicit PayPal sandbox API origin', () => {
     expect(paypalApiBase('sandbox')).toBe('https://api-m.sandbox.paypal.com');
-    expect(paypalApiBase('live')).toBe('https://api-m.paypal.com');
+    expect(() => paypalApiBase('live')).toThrow(/sandbox/i);
     expect(() => paypalApiBase('other')).toThrow(/environment/i);
   });
 

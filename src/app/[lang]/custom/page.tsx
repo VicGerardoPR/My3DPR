@@ -74,7 +74,7 @@ export default function CustomStudioPage({ params }: { params: Promise<{ lang: L
           {dict.title}
         </h1>
         <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
-          {dict.subtitle} Sube tus archivos 3D (.STL, .3MF, .OBJ) o describe tu proyecto para recibir una cotización formal sin compromiso en 24h.
+          {dict.subtitle} {lang === 'en' ? 'Describe your project to request a quote. File uploads depend on availability.' : 'Describe tu proyecto para solicitar una cotización. La carga de archivos depende de su disponibilidad.'}
         </p>
       </div>
 

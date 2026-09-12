@@ -19,7 +19,8 @@ import {
   retrievePayPalRedirect,
   retrieveStripeCheckout,
 } from '@/lib/payment-server';
-import { buildCheckoutUrls, canonicalSiteOrigin, paymentMethodSchema } from '@/lib/payments';
+import { buildCheckoutUrls, paymentMethodSchema } from '@/lib/payments';
+import { assertCheckoutConfigured } from '@/lib/payment-configuration';
 import { createPaymentStatusToken } from '@/lib/payment-status-token';
 
 const checkoutSchema = z.object({
@@ -50,8 +51,7 @@ export async function POST(request: NextRequest) {
   const statusSecret = process.env.PAYMENT_STATUS_SECRET || '';
   try {
     providerConfig = assertProviderConfigured(parsed.data.paymentMethod, process.env);
-    siteOrigin = canonicalSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
-    if (statusSecret.length < 32) throw new Error('Payment status secret is missing.');
+    siteOrigin = assertCheckoutConfigured(process.env);
   } catch {
     return NextResponse.json({ error: 'El método de pago seleccionado todavía no está configurado.', requestId }, { status: 503 });
   }
@@ -165,6 +165,6 @@ export async function POST(request: NextRequest) {
       await releaseOrderInventory(order.id).catch(() => undefined);
     }
     console.error(JSON.stringify({ requestId, area: 'checkout-provider', provider: parsed.data.paymentMethod }));
-    return NextResponse.json({ error: 'No fue posible iniciar el pago. No se realizó ningún cargo.', requestId, resetIdempotency }, { status: 502 });
+    return NextResponse.json({ error: 'No fue posible confirmar el inicio del pago. Si completaste un pago, verifica su estado antes de volver a intentarlo.', requestId, resetIdempotency }, { status: 502 });
   }
 }

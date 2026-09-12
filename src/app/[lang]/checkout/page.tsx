@@ -94,15 +94,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ lang: Local
           <section className="space-y-4 rounded-3xl border border-brand-dark-border bg-brand-dark-card p-6">
             <h2 className="flex items-center gap-2 font-heading text-base font-bold text-slate-200"><CreditCard className="h-5 w-5 text-brand-cyan" />Método de Pago</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <button type="button" disabled={!available.stripe} onClick={() => setPaymentMethod('STRIPE')} className={`rounded-2xl border p-4 text-left ${paymentMethod === 'STRIPE' && available.stripe ? 'border-brand-cyan bg-brand-cyan/15' : 'border-brand-dark-border'} disabled:cursor-not-allowed disabled:opacity-40`}>
+              {available.stripe && <button type="button" disabled={!available.stripe} onClick={() => setPaymentMethod('STRIPE')} className={`rounded-2xl border p-4 text-left ${paymentMethod === 'STRIPE' && available.stripe ? 'border-brand-cyan bg-brand-cyan/15' : 'border-brand-dark-border'} disabled:cursor-not-allowed disabled:opacity-40`}>
                 <CreditCard className="mb-2 h-5 w-5 text-brand-cyan" /><span className="block text-xs font-bold text-slate-100">Stripe Checkout</span><span className="mt-1 block text-[10px] text-slate-400">Tarjetas, Apple Pay y Google Pay en dispositivos compatibles.</span>
-              </button>
-              <button type="button" disabled={!available.paypal} onClick={() => setPaymentMethod('PAYPAL')} className={`rounded-2xl border p-4 text-left ${paymentMethod === 'PAYPAL' && available.paypal ? 'border-brand-cyan bg-brand-cyan/15' : 'border-brand-dark-border'} disabled:cursor-not-allowed disabled:opacity-40`}>
+              </button>}
+              {available.paypal && <button type="button" disabled={!available.paypal} onClick={() => setPaymentMethod('PAYPAL')} className={`rounded-2xl border p-4 text-left ${paymentMethod === 'PAYPAL' && available.paypal ? 'border-brand-cyan bg-brand-cyan/15' : 'border-brand-dark-border'} disabled:cursor-not-allowed disabled:opacity-40`}>
                 <WalletCards className="mb-2 h-5 w-5 text-brand-cyan" /><span className="block text-xs font-bold text-slate-100">PayPal Checkout</span><span className="mt-1 block text-[10px] text-slate-400">Pago mediante tu cuenta PayPal.</span>
-              </button>
+              </button>}
             </div>
             {available.loaded && !available.stripe && !available.paypal && <p role="alert" className="rounded-2xl border border-red-800/50 bg-red-950/20 p-4 text-xs text-red-300">Los pagos todavía no están configurados. No se creará ninguna orden.</p>}
-            <p className="rounded-2xl border border-brand-cyan/30 bg-brand-dark p-4 text-xs text-slate-300">El importe se calcula en el servidor. La orden solo se marca pagada después de verificar la captura con Stripe o PayPal.</p>
+            <p className="rounded-2xl border border-brand-cyan/30 bg-brand-dark p-4 text-xs text-slate-300">El importe se calcula en el servidor. La orden solo se marca pagada después de verificar el pago con el proveedor seleccionado.</p>
           </section>
         </div>
 

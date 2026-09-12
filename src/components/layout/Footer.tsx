@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, MapPin, Instagram, Facebook, Send, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { Mail, MapPin, Instagram, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { getDictionary, Locale } from '@/lib/i18n';
 
 export function Footer({ lang }: { lang: Locale }) {
   const dict = getDictionary(lang).footer;
+  const businessEmail = process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'victor.rivera@arcanointelligence.com';
 
   return (
     <footer className="bg-brand-dark border-t border-brand-dark-border text-slate-400 text-sm">
@@ -19,7 +20,7 @@ export function Footer({ lang }: { lang: Locale }) {
             </div>
             <div>
               <h4 className="font-semibold text-slate-200 text-base">{lang === 'en' ? 'PR & USA Shipping' : 'Envíos PR & EE.UU.'}</h4>
-              <p className="text-xs text-slate-400">{lang === 'en' ? 'Fast dispatches via USPS' : 'Despachos rápidos por USPS'}</p>
+              <p className="text-xs text-slate-400">{lang === 'en' ? 'Review shipping information before ordering' : 'Consulta la información de envío antes de comprar'}</p>
             </div>
           </div>
 
@@ -28,8 +29,8 @@ export function Footer({ lang }: { lang: Locale }) {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-semibold text-slate-200 text-base">{lang === 'en' ? '100% Secure Checkout' : 'Pagos Seguros'}</h4>
-              <p className="text-xs text-slate-400">{lang === 'en' ? 'Stripe and PayPal provider verification' : 'Verificación mediante Stripe y PayPal'}</p>
+              <h4 className="font-semibold text-slate-200 text-base">{lang === 'en' ? 'Payment Options' : 'Opciones de pago'}</h4>
+              <p className="text-xs text-slate-400">{lang === 'en' ? 'Available methods are shown at checkout' : 'Los métodos disponibles se muestran en checkout'}</p>
             </div>
           </div>
 
@@ -38,8 +39,8 @@ export function Footer({ lang }: { lang: Locale }) {
               <RefreshCw className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-semibold text-slate-200 text-base">{lang === 'en' ? 'Quality Guarantee' : 'Garantía de Calidad'}</h4>
-              <p className="text-xs text-slate-400">{lang === 'en' ? 'Hand-inspected 3D prints' : 'Impresión 3D probada pieza a pieza'}</p>
+              <h4 className="font-semibold text-slate-200 text-base">{lang === 'en' ? 'Product Information' : 'Información del producto'}</h4>
+              <p className="text-xs text-slate-400">{lang === 'en' ? 'Check materials and options in each listing' : 'Consulta materiales y opciones en cada ficha'}</p>
             </div>
           </div>
         </div>
@@ -68,26 +69,19 @@ export function Footer({ lang }: { lang: Locale }) {
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-brand-cyan" />
-              <span>{process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'Contacto por configurar'}</span>
+              <a href={`mailto:${businessEmail}`} className="break-all hover:text-brand-cyan">{businessEmail}</a>
             </div>
           </div>
 
           <div className="flex items-center gap-3 pt-2">
             <a
               href="https://instagram.com/my3d.pr"
+              aria-label="MY3D.PR Instagram"
               target="_blank"
               rel="noreferrer"
               className="w-9 h-9 rounded-xl bg-brand-dark-card border border-brand-dark-border flex items-center justify-center text-slate-300 hover:text-brand-cyan hover:border-brand-cyan transition-colors"
             >
               <Instagram className="w-4 h-4" />
-            </a>
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noreferrer"
-              className="w-9 h-9 rounded-xl bg-brand-dark-card border border-brand-dark-border flex items-center justify-center text-slate-300 hover:text-brand-cyan hover:border-brand-cyan transition-colors"
-            >
-              <Facebook className="w-4 h-4" />
             </a>
           </div>
         </div>
@@ -120,28 +114,17 @@ export function Footer({ lang }: { lang: Locale }) {
           </ul>
         </div>
 
-        {/* Column 4: Newsletter */}
+        {/* Column 4: Catalog updates, without subscription promises */}
         <div>
           <h4 className="font-heading font-bold text-slate-200 text-sm mb-4 uppercase tracking-wider">
-            Newsletter 3D
+            {lang === 'en' ? 'Explore the catalog' : 'Explora el catálogo'}
           </h4>
           <p className="text-xs text-slate-400 mb-3">
-            {lang === 'en' ? 'Get exclusive coupons & new drops weekly.' : 'Recibe cupones exclusivos y nuevos modelos cada semana.'}
+            {lang === 'en' ? 'Browse products and available options.' : 'Consulta los productos y sus opciones disponibles.'}
           </p>
-          <form action="/api/newsletter" method="post" className="space-y-2">
-            <div className="relative">
-              <input
-                type="email"
-                name="email"
-                placeholder="tu@email.com"
-                required
-                className="w-full bg-brand-dark-card border border-brand-dark-border text-slate-200 text-xs rounded-xl px-3 py-2.5 pr-10 focus:outline-none focus:border-brand-cyan"
-              />
-              <button type="submit" className="absolute right-2 top-2 text-brand-cyan hover:text-white p-1">
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-          </form>
+          <Link href={`/${lang}/shop`} className="text-brand-cyan hover:underline">
+            {lang === 'en' ? 'View catalog' : 'Ver catálogo'}
+          </Link>
         </div>
       </div>
 
@@ -149,10 +132,9 @@ export function Footer({ lang }: { lang: Locale }) {
       <div className="border-t border-brand-dark-border py-6 bg-brand-dark-surface">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} MY3D.PR. {dict.rights}</p>
-          <div className="flex items-center gap-3 font-semibold text-slate-400">
-            <span className="px-2 py-1 bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan rounded text-[10px] font-bold">STRIPE</span>
-            <span className="px-2 py-1 bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan rounded text-[10px] font-bold">PAYPAL</span>
-          </div>
+          <Link href={`/${lang}/checkout`} className="hover:text-brand-cyan">
+            {lang === 'en' ? 'Check available payment options at checkout' : 'Consulta las opciones de pago disponibles en checkout'}
+          </Link>
         </div>
       </div>
     </footer>

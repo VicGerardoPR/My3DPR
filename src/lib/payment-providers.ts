@@ -1,4 +1,5 @@
 import { PaymentMethod, toMinorUnits } from './payments';
+import { isConfiguredValue } from './payment-configuration';
 
 type Environment = Record<string, string | undefined>;
 type CheckoutOrder = { id: string; orderNumber: string; email: string; total: number; currency: string };
@@ -13,7 +14,7 @@ export function buildPayPalRequestId(orderId: string) {
 
 export function assertProviderConfigured(method: PaymentMethod, env: Environment) {
   if (method === 'STRIPE') {
-    if (!env.STRIPE_SECRET_KEY || !env.STRIPE_WEBHOOK_SECRET) {
+    if (!isConfiguredValue(env.STRIPE_SECRET_KEY) || !isConfiguredValue(env.STRIPE_WEBHOOK_SECRET)) {
       throw new Error('Stripe is not configured with secret and webhook credentials.');
     }
     if (env.STRIPE_ENVIRONMENT !== 'test') {
@@ -24,11 +25,11 @@ export function assertProviderConfigured(method: PaymentMethod, env: Environment
     }
     return { method, environment: 'test', secretKey: env.STRIPE_SECRET_KEY, webhookSecret: env.STRIPE_WEBHOOK_SECRET } as const;
   }
-  if (!env.PAYPAL_CLIENT_ID || !env.PAYPAL_CLIENT_SECRET || !env.PAYPAL_WEBHOOK_ID) {
+  if (!isConfiguredValue(env.PAYPAL_CLIENT_ID) || !isConfiguredValue(env.PAYPAL_CLIENT_SECRET) || !isConfiguredValue(env.PAYPAL_WEBHOOK_ID)) {
     throw new Error('PayPal is not configured with client and webhook credentials.');
   }
-  if (env.PAYPAL_ENVIRONMENT !== 'sandbox' && env.PAYPAL_ENVIRONMENT !== 'live') {
-    throw new Error('PayPal environment must be explicit: sandbox or live.');
+  if (env.PAYPAL_ENVIRONMENT !== 'sandbox') {
+    throw new Error('PayPal environment must be explicitly set to sandbox.');
   }
   return {
     method,
@@ -87,8 +88,7 @@ export function buildPayPalOrderPayload(order: CheckoutOrder, urls: CheckoutUrls
 
 export function paypalApiBase(environment: string) {
   if (environment === 'sandbox') return 'https://api-m.sandbox.paypal.com';
-  if (environment === 'live') return 'https://api-m.paypal.com';
-  throw new Error('Invalid PayPal environment.');
+  throw new Error('PayPal environment must be sandbox; live payments are disabled.');
 }
 
 export function shouldReleaseReservationAfterProviderFailure(

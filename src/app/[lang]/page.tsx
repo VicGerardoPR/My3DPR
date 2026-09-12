@@ -64,7 +64,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: Loc
                 <p className="text-[11px] text-slate-400">Modelos hechos con detalle</p>
               </div>
               <div>
-                <span className="font-heading font-extrabold text-2xl text-brand-cyan">100%</span>
+                <span className="font-heading font-extrabold text-2xl text-brand-cyan">PR + USA</span>
                 <p className="text-[11px] text-slate-400">Envíos PR & EE.UU.</p>
               </div>
               <div>
