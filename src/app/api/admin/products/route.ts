@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminErrorResponse, getAdminDatabase, requireAdmin } from '@/lib/admin-auth';
+import { adminErrorResponse, getAdminDatabase, requireAdmin, writeAdminAudit, type AuthorizedAdmin } from '@/lib/admin-auth';
 
 const productSchema = z.object({
   name_es: z.string().trim().min(2).max(160),
@@ -22,6 +22,72 @@ const productSchema = z.object({
 });
 
 class ProductConflictError extends Error {}
+
+type ProductPayload = z.infer<typeof productSchema>;
+
+async function createProductWithCompensatingCleanup(
+  db: ReturnType<typeof getAdminDatabase>,
+  admin: AuthorizedAdmin,
+  value: ProductPayload,
+  form: FormData,
+  imageUrl: string,
+) {
+  let productId: string | null = null;
+  const { data: product, error: productError } = await db.from('products').insert({
+    name_es: value.name_es,
+    name_en: value.name_en,
+    slug: value.slug,
+    sku: value.sku,
+    description_es: value.description_es,
+    description_en: value.description_en,
+    price: value.price,
+    cost_price: value.cost_price === '' ? null : value.cost_price,
+    status: value.status,
+    material: value.material,
+    weight_grams: value.weight_grams,
+    dimensions_cm: value.dimensions_cm || null,
+    lead_time_days: value.lead_time_days,
+    is_customizable: false,
+    is_featured: form.get('is_featured') === 'true',
+    is_new: true,
+    is_best_seller: false,
+  }).select('*').single();
+  if (productError || !product) {
+    if (productError?.code === '23505') throw new ProductConflictError('Duplicate product SKU or slug.');
+    throw new Error(`Could not insert product fallback: ${productError?.code || 'missing'}`);
+  }
+  productId = product.id;
+  try {
+    const { data: image, error: imageError } = await db.from('product_images').insert({
+      product_id: product.id,
+      url: imageUrl,
+      alt_text: value.name_es,
+      sort_order: 0,
+      is_primary: true,
+    }).select('*').single();
+    if (imageError || !image) throw new Error(`Could not insert product image fallback: ${imageError?.code || 'missing'}`);
+
+    const { data: variant, error: variantError } = await db.from('product_variants').insert({
+      product_id: product.id,
+      sku: `${value.sku}-STD`,
+      size: value.size,
+      color: value.color,
+      material: value.material,
+      price: value.price,
+      stock_quantity: value.stock,
+      image_url: imageUrl,
+      weight_grams: value.weight_grams,
+      active: true,
+    }).select('*').single();
+    if (variantError || !variant) throw new Error(`Could not insert product variant fallback: ${variantError?.code || 'missing'}`);
+
+    await writeAdminAudit(db, admin, 'PRODUCT_CREATED', 'PRODUCT', product.id, { sku: value.sku, slug: value.slug, mode: 'rest-fallback' });
+    return { ...product, images: [image], variants: [variant] };
+  } catch (error) {
+    if (productId) await db.from('products').delete().eq('id', productId);
+    throw error;
+  }
+}
 
 function formValues(form: FormData) {
   return Object.fromEntries([...form.entries()].filter(([, value]) => typeof value === 'string'));
@@ -76,12 +142,17 @@ export async function POST(request: NextRequest) {
       p_is_featured: form.get('is_featured') === 'true', p_stock: value.stock,
       p_color: value.color, p_size: value.size, p_image_url: imageUrl,
     });
+    let productResult = data;
     if (error || !data) {
       if (error?.code === '23505') throw new ProductConflictError('Duplicate product SKU or slug.');
-      throw new Error(`Could not create product transaction: ${error?.code || 'missing'}`);
+      if (error?.code === 'PGRST202') {
+        productResult = await createProductWithCompensatingCleanup(db, admin, value, form, imageUrl);
+      } else {
+        throw new Error(`Could not create product transaction: ${error?.code || 'missing'}`);
+      }
     }
     imagePath = null;
-    return NextResponse.json({ product: data }, { status: 201 });
+    return NextResponse.json({ product: productResult }, { status: 201 });
   } catch (error) {
     if (imagePath && storageDb) {
       const { error: cleanupError } = await storageDb.storage.from('product-images').remove([imagePath]);
