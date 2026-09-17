@@ -2,6 +2,7 @@ import 'server-only';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from './admin-session';
+import { isVerifiedOwner } from './admin-owner';
 import { canAdmin, isAdminRole, permissionsForRole, type AdminPermission, type AdminRole } from './admin-permissions';
 
 export type AuthorizedAdmin = {
@@ -14,7 +15,7 @@ export type AuthorizedAdmin = {
 };
 
 export class AdminAuthorizationError extends Error {
-  constructor(public status: 401 | 403 | 503, message: string) {
+  constructor(public status: 401 | 403 | 429 | 503, message: string) {
     super(message);
   }
 }
@@ -48,13 +49,21 @@ export async function requireAdmin(request: NextRequest, permission: AdminPermis
   if (error || !data || !isAdminRole(data.role)) throw new AdminAuthorizationError(401, 'Acceso administrativo revocado.');
   if (!canAdmin(data.role, permission)) throw new AdminAuthorizationError(403, 'Tu rol no permite realizar esta acción.');
 
+  let owner = false;
+  if (data.role === 'SUPER_ADMIN') {
+    try { owner = await isVerifiedOwner(db, session.userId); }
+    catch { throw new AdminAuthorizationError(503, 'No fue posible verificar al propietario.'); }
+  }
+  if (permission === 'manage_admins' && !owner) {
+    throw new AdminAuthorizationError(403, 'Solo el propietario puede gestionar administradores.');
+  }
   return {
     id: data.id,
     userId: data.user_id,
     email: data.email,
     fullName: data.full_name,
     role: data.role,
-    permissions: permissionsForRole(data.role),
+    permissions: permissionsForRole(data.role).filter((value) => value !== 'manage_admins' || owner),
   };
 }
 

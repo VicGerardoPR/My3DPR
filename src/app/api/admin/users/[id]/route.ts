@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminErrorResponse, getAdminDatabase, requireAdmin } from '@/lib/admin-auth';
 import { ADMIN_ROLES } from '@/lib/admin-permissions';
+import { limitAdminRequest } from '@/lib/admin-email';
 
 const adminUpdateSchema = z.object({
   full_name: z.string().trim().min(2).max(120).optional(),
   role: z.enum(ADMIN_ROLES).optional(),
   active: z.boolean().optional(),
-}).refine((value) => Object.keys(value).length > 0, 'No changes supplied');
+}).strict().refine((value) => Object.keys(value).length > 0, 'No changes supplied');
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -15,6 +16,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const actor = await requireAdmin(request, 'manage_admins');
     const { id } = await context.params;
+    if (!z.string().uuid().safeParse(id).success) return NextResponse.json({ error: 'Administrador inválido.' }, { status: 400 });
     const parsed = adminUpdateSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: 'Revisa los cambios del administrador.', issues: parsed.error.flatten().fieldErrors }, { status: 400 });
     if (id === actor.id && (parsed.data.active === false || (parsed.data.role && parsed.data.role !== 'SUPER_ADMIN'))) {
@@ -22,6 +24,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     const db = getAdminDatabase();
+    await limitAdminRequest(db, actor, 'UPDATE', id);
     const { data: rpcData, error } = await db.rpc('admin_update_access', {
       p_actor_user_id: actor.userId,
       p_target_admin_id: id,
