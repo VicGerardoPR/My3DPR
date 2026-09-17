@@ -43,4 +43,23 @@ describe('admin product creation compensation', () => {
     expect(dashboard).toContain('Mover imagen abajo');
     expect(dashboard).toContain('deleteImage(image.id)');
   });
+
+  it('creates products from Spanish fields and generates English automatically', () => {
+    expect(createRoute).toContain('withGeneratedEnglish(parsed.data)');
+    expect(createRoute).toContain('autoTranslateSpanishToEnglish');
+    expect(createRoute).toContain('const nameEn = autoTranslateSpanishToEnglish(value.name_es).slice(0, 160);');
+    expect(createRoute).not.toContain('value.name_en?.trim() ||');
+    expect(createRoute).not.toContain('value.description_en?.trim() ||');
+    expect(dashboard).toContain('Escribe en español; el inglés se genera automáticamente.');
+    expect(dashboard).not.toContain('id="product-create-name_en"');
+    expect(dashboard).not.toContain('id="product-create-description_en"');
+  });
+
+  it('adds a business dashboard tab with operational KPIs', () => {
+    expect(dashboard).toContain("type Tab = 'overview' | 'business' | 'products' | 'quotes' | 'team'");
+    expect(dashboard).toContain("['business','Negocio']");
+    expect(dashboard).toContain('Ticket promedio estimado');
+    expect(dashboard).toContain('Alertas de catálogo');
+    expect(dashboard).toContain('Próximas acciones recomendadas');
+  });
 });

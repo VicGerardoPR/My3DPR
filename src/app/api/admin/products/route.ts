@@ -4,11 +4,11 @@ import { adminErrorResponse, getAdminDatabase, requireAdmin, writeAdminAudit, ty
 
 const productSchema = z.object({
   name_es: z.string().trim().min(2).max(160),
-  name_en: z.string().trim().min(2).max(160),
+  name_en: z.string().trim().min(2).max(160).optional().default(''),
   slug: z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
   sku: z.string().trim().toUpperCase().regex(/^[A-Z0-9][A-Z0-9._-]{2,63}$/),
   description_es: z.string().trim().max(5000).default(''),
-  description_en: z.string().trim().max(5000).default(''),
+  description_en: z.string().trim().max(5000).optional().default(''),
   price: z.coerce.number().positive().max(1_000_000),
   cost_price: z.union([z.coerce.number().nonnegative().max(1_000_000), z.literal('')]).optional(),
   stock: z.coerce.number().int().min(0).max(1_000_000),
@@ -24,6 +24,24 @@ const productSchema = z.object({
 class ProductConflictError extends Error {}
 
 type ProductPayload = z.infer<typeof productSchema>;
+
+const esToEnTerms: Record<string, string> = {
+  ajustable: 'adjustable', barco: 'boat', bajo: 'made', cuentas: 'pieces', colgante: 'hanging', contenedor: 'container', decorativo: 'decorative', florero: 'vase', hongo: 'mushroom', miniatura: 'miniature', pedido: 'to order', pla: 'PLA', pokebola: 'pokeball', producto: 'product', prueba: 'test', soporte: 'stand', telefono: 'phone', teléfono: 'phone', tortuga: 'turtle', zorro: 'fox', perro: 'dog', conejo: 'bunny', dragon: 'dragon', dragón: 'dragon', dinosaurio: 'dinosaur', imagen: 'image', ilustracion: 'illustration', ilustración: 'illustration', original: 'original', precio: 'price', provisional: 'provisional', editable: 'editable', color: 'color', final: 'final', confirma: 'confirmed', antes: 'before', produccion: 'production', producción: 'production', decorativa: 'decorative', personalizado: 'custom', personalizada: 'custom', pieza: 'piece', piezas: 'pieces', set: 'set', ajedrez: 'chess', corazon: 'heart', corazón: 'heart'
+};
+
+function autoTranslateSpanishToEnglish(value: string) {
+  return value.replace(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+/g, (word) => {
+    const translated = esToEnTerms[word.toLowerCase()];
+    if (!translated) return word;
+    return word[0] === word[0]?.toUpperCase() ? translated.charAt(0).toUpperCase() + translated.slice(1) : translated;
+  });
+}
+
+function withGeneratedEnglish(value: ProductPayload): ProductPayload {
+  const nameEn = autoTranslateSpanishToEnglish(value.name_es).slice(0, 160);
+  const descriptionEn = value.description_es ? autoTranslateSpanishToEnglish(value.description_es) : '';
+  return { ...value, name_en: nameEn.length >= 2 ? nameEn : value.name_es, description_en: descriptionEn };
+}
 
 async function createProductWithCompensatingCleanup(
   db: ReturnType<typeof getAdminDatabase>,
@@ -124,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     const db = getAdminDatabase();
     storageDb = db;
-    const value = parsed.data;
+    const value = withGeneratedEnglish(parsed.data);
     const extension = image.type === 'image/png' ? 'png' : image.type === 'image/webp' ? 'webp' : 'jpg';
     imagePath = `${value.slug}/${crypto.randomUUID()}.${extension}`;
     const bytes = new Uint8Array(await image.arrayBuffer());
