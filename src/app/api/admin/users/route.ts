@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminErrorResponse, getAdminDatabase, requireAdmin } from '@/lib/admin-auth';
 import { ADMIN_ROLES } from '@/lib/admin-permissions';
+import { adminRecoveryUrl, limitAdminRequest } from '@/lib/admin-email';
 
 const createAdminSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
   full_name: z.string().trim().min(2).max(120),
   role: z.enum(ADMIN_ROLES),
-});
+}).strict();
 
 async function listAllAuthUsers(db: ReturnType<typeof getAdminDatabase>) {
   const users = [];
@@ -22,18 +23,19 @@ async function listAllAuthUsers(db: ReturnType<typeof getAdminDatabase>) {
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin(request, 'manage_admins');
+    const actor = await requireAdmin(request, 'manage_admins');
     const db = getAdminDatabase();
+    await limitAdminRequest(db, actor, 'LIST');
     const [{ data: admins, error }, authUsers] = await Promise.all([
       db.from('admin_whitelist').select('id,user_id,email,full_name,role,active,created_at,updated_at,last_login_at').order('created_at'),
       listAllAuthUsers(db),
     ]);
     if (error) throw new Error(`Could not list administrators: ${error.code}`);
-    const authByEmail = new Map(authUsers.map((user) => [user.email?.toLowerCase(), user]));
+    const authById = new Map(authUsers.map((user) => [user.id, user]));
     return NextResponse.json({
       admins: (admins || []).map((admin) => {
-        const authUser = authByEmail.get(admin.email.toLowerCase());
-        return { ...admin, invited: Boolean(authUser), email_confirmed: Boolean(authUser?.email_confirmed_at), last_sign_in_at: authUser?.last_sign_in_at || null };
+        const authUser = authById.get(admin.user_id);
+        return { ...admin, can_reset_password: admin.active && admin.user_id !== actor.userId && Boolean(authUser && authUser.email?.toLowerCase() === admin.email.toLowerCase()), invited: Boolean(authUser), email_confirmed: Boolean(authUser?.email_confirmed_at), last_sign_in_at: authUser?.last_sign_in_at || null };
       }),
     });
   } catch (error) {
@@ -50,19 +52,20 @@ export async function POST(request: NextRequest) {
     const value = parsed.data;
     const db = getAdminDatabase();
 
-    const { data: existing } = await db.from('admin_whitelist').select('id,active').eq('email', value.email).maybeSingle();
+    await limitAdminRequest(db, admin, 'INVITE');
+    const { data: existing, error: existingError } = await db.from('admin_whitelist').select('id,active').eq('email', value.email).maybeSingle();
+    if (existingError) throw new Error('Could not inspect administrator');
     if (existing?.active) return NextResponse.json({ error: 'Ese correo ya tiene acceso administrativo.' }, { status: 409 });
 
     const authUsers = await listAllAuthUsers(db);
     let targetUserId = authUsers.find((user) => user.email?.toLowerCase() === value.email)?.id;
     const invited = !targetUserId;
     if (!targetUserId) {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.my3dpr.site';
       const { data: invitation, error: inviteError } = await db.auth.admin.inviteUserByEmail(value.email, {
         data: { full_name: value.full_name },
-        redirectTo: `${siteUrl}/es/admin/login`,
+        redirectTo: adminRecoveryUrl(),
       });
-      if (inviteError) throw new Error(`Could not invite administrator: ${inviteError.message}`);
+      if (inviteError) throw new Error(`Could not invite administrator: ${inviteError.status}`);
       targetUserId = invitation.user.id;
       newlyInvitedUserId = targetUserId;
     }
