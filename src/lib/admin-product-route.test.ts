@@ -45,7 +45,10 @@ describe('admin product creation compensation', () => {
   });
 
   it('creates products from Spanish fields and generates English automatically', () => {
-    expect(createRoute).toContain('withGeneratedEnglish(parsed.data)');
+    expect(createRoute).toContain('withGeneratedEnglish(withGeneratedIdentifiers(parsed.data))');
+    expect(createRoute).toContain('withGeneratedIdentifiers');
+    expect(createRoute).toContain('crypto.randomUUID()');
+    expect(createRoute).toContain('Revisa estos campos:');
     expect(createRoute).toContain('autoTranslateSpanishToEnglish');
     expect(createRoute).toContain('const nameEn = autoTranslateSpanishToEnglish(value.name_es).slice(0, 160);');
     expect(createRoute).not.toContain('value.name_en?.trim() ||');

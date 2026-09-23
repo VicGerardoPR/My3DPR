@@ -61,8 +61,8 @@ function ProductCreateForm({ onClose, onCreated }: { onClose: () => void; onCrea
     <div className="mb-4 flex items-center justify-between"><h3 className="font-heading font-bold text-slate-100">Nuevo producto</h3><button onClick={onClose} aria-label="Cerrar"><X className="h-5 w-5" /></button></div>
     <form aria-label="Crear producto" id="product-create-form" onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <label className={labelClass}>Nombre del producto<input id="product-create-name_es" name="name_es" required minLength={2} className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Escribe en español; el inglés se genera automáticamente.</span></label>
-      <label className={labelClass}>Slug<input id="product-create-slug" name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="nombre-del-producto" className={inputClass} /></label>
-      <label className={labelClass}>SKU<input id="product-create-sku" name="sku" required minLength={3} placeholder="MY3D-001" className={inputClass} /></label>
+      <label className={labelClass}>Slug<input id="product-create-slug" name="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="Se genera desde el nombre" className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Opcional; se genera automáticamente si lo dejas vacío.</span></label>
+      <label className={labelClass}>SKU<input id="product-create-sku" name="sku" minLength={3} placeholder="Se genera automáticamente" className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Opcional; puedes editarlo después.</span></label>
       <label className={labelClass}>Precio<input id="product-create-price" name="price" required type="number" min="0.01" step="0.01" className={inputClass} /></label>
       <label className={labelClass}>Costo<input id="product-create-cost_price" name="cost_price" type="number" min="0" step="0.01" className={inputClass} /></label>
       <label className={labelClass}>Inventario<input id="product-create-stock" name="stock" required type="number" min="0" step="1" className={inputClass} /></label>

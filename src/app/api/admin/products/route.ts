@@ -5,8 +5,8 @@ import { adminErrorResponse, getAdminDatabase, requireAdmin, writeAdminAudit, ty
 const productSchema = z.object({
   name_es: z.string().trim().min(2).max(160),
   name_en: z.string().trim().min(2).max(160).optional().default(''),
-  slug: z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
-  sku: z.string().trim().toUpperCase().regex(/^[A-Z0-9][A-Z0-9._-]{2,63}$/),
+  slug: z.union([z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160), z.literal('')]).default(''),
+  sku: z.union([z.string().trim().toUpperCase().regex(/^[A-Z0-9][A-Z0-9._-]{2,63}$/), z.literal('')]).default(''),
   description_es: z.string().trim().max(5000).default(''),
   description_en: z.string().trim().max(5000).optional().default(''),
   price: z.coerce.number().positive().max(1_000_000),
@@ -41,6 +41,14 @@ function withGeneratedEnglish(value: ProductPayload): ProductPayload {
   const nameEn = autoTranslateSpanishToEnglish(value.name_es).slice(0, 160);
   const descriptionEn = value.description_es ? autoTranslateSpanishToEnglish(value.description_es) : '';
   return { ...value, name_en: nameEn.length >= 2 ? nameEn : value.name_es, description_en: descriptionEn };
+}
+
+function withGeneratedIdentifiers(value: ProductPayload): ProductPayload {
+  const slug = value.slug || value.name_es
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 140) || 'producto';
+  const sku = value.sku || `MY3D-${crypto.randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase()}`;
+  return { ...value, slug, sku };
 }
 
 async function createProductWithCompensatingCleanup(
@@ -132,7 +140,11 @@ export async function POST(request: NextRequest) {
     const admin = await requireAdmin(request, 'manage_products');
     const form = await request.formData();
     const parsed = productSchema.safeParse(formValues(form));
-    if (!parsed.success) return NextResponse.json({ error: 'Revisa los campos del producto.', issues: parsed.error.flatten().fieldErrors }, { status: 400 });
+    if (!parsed.success) {
+      const issues = parsed.error.flatten().fieldErrors;
+      const fields = Object.keys(issues).join(', ');
+      return NextResponse.json({ error: fields ? `Revisa estos campos: ${fields}.` : 'Revisa los campos del producto.', issues }, { status: 400 });
+    }
 
     const image = form.get('image');
     if (!(image instanceof File) || image.size === 0) return NextResponse.json({ error: 'Selecciona una imagen del producto.' }, { status: 400 });
@@ -142,7 +154,7 @@ export async function POST(request: NextRequest) {
 
     const db = getAdminDatabase();
     storageDb = db;
-    const value = withGeneratedEnglish(parsed.data);
+    const value = withGeneratedEnglish(withGeneratedIdentifiers(parsed.data));
     const extension = image.type === 'image/png' ? 'png' : image.type === 'image/webp' ? 'webp' : 'jpg';
     imagePath = `${value.slug}/${crypto.randomUUID()}.${extension}`;
     const bytes = new Uint8Array(await image.arrayBuffer());
