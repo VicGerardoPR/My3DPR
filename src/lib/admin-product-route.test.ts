@@ -56,6 +56,8 @@ describe('admin product creation compensation', () => {
     expect(dashboard).toContain('Escribe en español; el inglés se genera automáticamente.');
     expect(dashboard).not.toContain('id="product-create-name_en"');
     expect(dashboard).not.toContain('id="product-create-description_en"');
+    expect(dashboard).toContain('name="slug" placeholder="Se genera desde el nombre"');
+    expect(dashboard).toContain('name="sku" minLength={3} placeholder="Se genera automáticamente"');
   });
 
   it('adds a business dashboard tab with operational KPIs', () => {
