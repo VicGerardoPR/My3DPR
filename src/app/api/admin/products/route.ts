@@ -1,29 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { adminErrorResponse, getAdminDatabase, requireAdmin, writeAdminAudit, type AuthorizedAdmin } from '@/lib/admin-auth';
-
-const productSchema = z.object({
-  name_es: z.string().trim().min(2).max(160),
-  name_en: z.string().trim().min(2).max(160).optional().default(''),
-  slug: z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
-  sku: z.string().trim().toUpperCase().regex(/^[A-Z0-9][A-Z0-9._-]{2,63}$/),
-  description_es: z.string().trim().max(5000).default(''),
-  description_en: z.string().trim().max(5000).optional().default(''),
-  price: z.coerce.number().positive().max(1_000_000),
-  cost_price: z.union([z.coerce.number().nonnegative().max(1_000_000), z.literal('')]).optional(),
-  stock: z.coerce.number().int().min(0).max(1_000_000),
-  material: z.string().trim().min(1).max(80).default('PLA'),
-  color: z.string().trim().min(1).max(100).default('Estándar'),
-  size: z.string().trim().min(1).max(100).default('Estándar'),
-  status: z.enum(['AVAILABLE', 'READY_TO_SHIP', 'MADE_TO_ORDER', 'LOW_STOCK', 'OUT_OF_STOCK', 'PRE_ORDER', 'COMING_SOON']).default('AVAILABLE'),
-  dimensions_cm: z.string().trim().max(100).optional(),
-  weight_grams: z.coerce.number().int().min(0).max(1_000_000).default(100),
-  lead_time_days: z.coerce.number().int().min(0).max(365).default(3),
-});
+import { parseProductPayload, type ProductPayload } from '@/lib/admin-product-validation';
 
 class ProductConflictError extends Error {}
 
-type ProductPayload = z.infer<typeof productSchema>;
 
 const esToEnTerms: Record<string, string> = {
   ajustable: 'adjustable', barco: 'boat', bajo: 'made', cuentas: 'pieces', colgante: 'hanging', contenedor: 'container', decorativo: 'decorative', florero: 'vase', hongo: 'mushroom', miniatura: 'miniature', pedido: 'to order', pla: 'PLA', pokebola: 'pokeball', producto: 'product', prueba: 'test', soporte: 'stand', telefono: 'phone', teléfono: 'phone', tortuga: 'turtle', zorro: 'fox', perro: 'dog', conejo: 'bunny', dragon: 'dragon', dragón: 'dragon', dinosaurio: 'dinosaur', imagen: 'image', ilustracion: 'illustration', ilustración: 'illustration', original: 'original', precio: 'price', provisional: 'provisional', editable: 'editable', color: 'color', final: 'final', confirma: 'confirmed', antes: 'before', produccion: 'production', producción: 'production', decorativa: 'decorative', personalizado: 'custom', personalizada: 'custom', pieza: 'piece', piezas: 'pieces', set: 'set', ajedrez: 'chess', corazon: 'heart', corazón: 'heart'
@@ -41,6 +21,14 @@ function withGeneratedEnglish(value: ProductPayload): ProductPayload {
   const nameEn = autoTranslateSpanishToEnglish(value.name_es).slice(0, 160);
   const descriptionEn = value.description_es ? autoTranslateSpanishToEnglish(value.description_es) : '';
   return { ...value, name_en: nameEn.length >= 2 ? nameEn : value.name_es, description_en: descriptionEn };
+}
+
+function withGeneratedIdentifiers(value: ProductPayload): ProductPayload {
+  const slug = value.slug || value.name_es
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 140) || 'producto';
+  const sku = value.sku || `MY3D-${crypto.randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase()}`;
+  return { ...value, slug, sku };
 }
 
 async function createProductWithCompensatingCleanup(
@@ -131,24 +119,31 @@ export async function POST(request: NextRequest) {
   try {
     const admin = await requireAdmin(request, 'manage_products');
     const form = await request.formData();
-    const parsed = productSchema.safeParse(formValues(form));
-    if (!parsed.success) return NextResponse.json({ error: 'Revisa los campos del producto.', issues: parsed.error.flatten().fieldErrors }, { status: 400 });
+    const parsed = parseProductPayload(formValues(form));
+    if (!parsed.success) {
+      const issues = parsed.error.flatten().fieldErrors;
+      const fields = Object.keys(issues).join(', ');
+      return NextResponse.json({ error: fields ? `Revisa estos campos: ${fields}.` : 'Revisa los campos del producto.', issues }, { status: 400 });
+    }
 
     const image = form.get('image');
-    if (!(image instanceof File) || image.size === 0) return NextResponse.json({ error: 'Selecciona una imagen del producto.' }, { status: 400 });
-    if (image.size > 5 * 1024 * 1024 || !['image/png', 'image/jpeg', 'image/webp'].includes(image.type)) {
+    const hasImage = image instanceof File && image.size > 0;
+    if (hasImage && (image.size > 5 * 1024 * 1024 || !['image/png', 'image/jpeg', 'image/webp'].includes(image.type))) {
       return NextResponse.json({ error: 'La imagen debe ser PNG, JPG o WebP y pesar menos de 5 MB.' }, { status: 400 });
     }
 
     const db = getAdminDatabase();
     storageDb = db;
-    const value = withGeneratedEnglish(parsed.data);
-    const extension = image.type === 'image/png' ? 'png' : image.type === 'image/webp' ? 'webp' : 'jpg';
-    imagePath = `${value.slug}/${crypto.randomUUID()}.${extension}`;
-    const bytes = new Uint8Array(await image.arrayBuffer());
-    const { error: uploadError } = await db.storage.from('product-images').upload(imagePath, bytes, { contentType: image.type, cacheControl: '31536000' });
-    if (uploadError) throw new Error(`Could not upload product image: ${uploadError.message}`);
-    const imageUrl = db.storage.from('product-images').getPublicUrl(imagePath).data.publicUrl;
+    const value = withGeneratedEnglish(withGeneratedIdentifiers(parsed.data));
+    let imageUrl = new URL('/images/product-placeholder.svg', request.url).toString();
+    if (hasImage) {
+      const extension = image.type === 'image/png' ? 'png' : image.type === 'image/webp' ? 'webp' : 'jpg';
+      imagePath = `${value.slug}/${crypto.randomUUID()}.${extension}`;
+      const bytes = new Uint8Array(await image.arrayBuffer());
+      const { error: uploadError } = await db.storage.from('product-images').upload(imagePath, bytes, { contentType: image.type, cacheControl: '31536000' });
+      if (uploadError) throw new Error(`Could not upload product image: ${uploadError.message}`);
+      imageUrl = db.storage.from('product-images').getPublicUrl(imagePath).data.publicUrl;
+    }
 
     const { data, error } = await db.rpc('admin_create_product', {
       p_actor_user_id: admin.userId, p_name_es: value.name_es, p_name_en: value.name_en,

@@ -45,14 +45,22 @@ describe('admin product creation compensation', () => {
   });
 
   it('creates products from Spanish fields and generates English automatically', () => {
-    expect(createRoute).toContain('withGeneratedEnglish(parsed.data)');
+    expect(createRoute).toContain('withGeneratedEnglish(withGeneratedIdentifiers(parsed.data))');
+    expect(createRoute).toContain('withGeneratedIdentifiers');
+    expect(createRoute).toContain('crypto.randomUUID()');
+    expect(createRoute).toContain('Revisa estos campos:');
     expect(createRoute).toContain('autoTranslateSpanishToEnglish');
     expect(createRoute).toContain('const nameEn = autoTranslateSpanishToEnglish(value.name_es).slice(0, 160);');
     expect(createRoute).not.toContain('value.name_en?.trim() ||');
     expect(createRoute).not.toContain('value.description_en?.trim() ||');
-    expect(dashboard).toContain('Escribe en español; el inglés se genera automáticamente.');
+    expect(dashboard).toContain('Si lo dejas vacío, se genera desde la descripción.');
     expect(dashboard).not.toContain('id="product-create-name_en"');
     expect(dashboard).not.toContain('id="product-create-description_en"');
+    expect(dashboard).toContain('name="slug" placeholder="Se genera desde el nombre"');
+    expect(dashboard).toContain('name="sku" placeholder="Se genera automáticamente"');
+    expect(dashboard).toContain('name="price" required type="number"');
+    expect(dashboard).toContain('name="description_es" required minLength={1}');
+    expect(dashboard).not.toContain('name="image" required');
   });
 
   it('adds a business dashboard tab with operational KPIs', () => {
