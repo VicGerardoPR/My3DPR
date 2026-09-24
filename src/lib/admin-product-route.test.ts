@@ -53,7 +53,7 @@ describe('admin product creation compensation', () => {
     expect(createRoute).toContain('const nameEn = autoTranslateSpanishToEnglish(value.name_es).slice(0, 160);');
     expect(createRoute).not.toContain('value.name_en?.trim() ||');
     expect(createRoute).not.toContain('value.description_en?.trim() ||');
-    expect(dashboard).toContain('Escribe en español; el inglés se genera automáticamente.');
+    expect(dashboard).toContain('Si lo dejas vacío, se genera desde la descripción.');
     expect(dashboard).not.toContain('id="product-create-name_en"');
     expect(dashboard).not.toContain('id="product-create-description_en"');
     expect(dashboard).toContain('name="slug" placeholder="Se genera desde el nombre"');
