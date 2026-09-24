@@ -57,7 +57,10 @@ describe('admin product creation compensation', () => {
     expect(dashboard).not.toContain('id="product-create-name_en"');
     expect(dashboard).not.toContain('id="product-create-description_en"');
     expect(dashboard).toContain('name="slug" placeholder="Se genera desde el nombre"');
-    expect(dashboard).toContain('name="sku" minLength={3} placeholder="Se genera automáticamente"');
+    expect(dashboard).toContain('name="sku" placeholder="Se genera automáticamente"');
+    expect(dashboard).toContain('name="price" required type="number"');
+    expect(dashboard).toContain('name="description_es" required minLength={1}');
+    expect(dashboard).not.toContain('name="image" required');
   });
 
   it('adds a business dashboard tab with operational KPIs', () => {

@@ -60,18 +60,18 @@ function ProductCreateForm({ onClose, onCreated }: { onClose: () => void; onCrea
   return <div className="rounded-2xl border border-brand-cyan/30 bg-brand-dark-card p-5">
     <div className="mb-4 flex items-center justify-between"><h3 className="font-heading font-bold text-slate-100">Nuevo producto</h3><button onClick={onClose} aria-label="Cerrar"><X className="h-5 w-5" /></button></div>
     <form aria-label="Crear producto" id="product-create-form" onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <label className={labelClass}>Nombre del producto<input id="product-create-name_es" name="name_es" required minLength={2} className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Escribe en español; el inglés se genera automáticamente.</span></label>
-      <label className={labelClass}>Slug<input id="product-create-slug" name="slug" placeholder="Se genera desde el nombre" className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Opcional; se genera automáticamente si lo dejas vacío.</span></label>
-      <label className={labelClass}>SKU<input id="product-create-sku" name="sku" minLength={3} placeholder="Se genera automáticamente" className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Opcional; puedes editarlo después.</span></label>
+      <label className={labelClass}>Nombre del producto<input id="product-create-name_es" name="name_es" className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Si lo dejas vacío, se genera desde la descripción.</span></label>
+      <label className={labelClass}>Slug<input id="product-create-slug" name="slug" placeholder="Se genera desde el nombre" className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Opcional; se genera automáticamente.</span></label>
+      <label className={labelClass}>SKU<input id="product-create-sku" name="sku" placeholder="Se genera automáticamente" className={inputClass} /></label>
       <label className={labelClass}>Precio<input id="product-create-price" name="price" required type="number" min="0.01" step="0.01" className={inputClass} /></label>
-      <label className={labelClass}>Costo<input id="product-create-cost_price" name="cost_price" type="number" min="0" step="0.01" className={inputClass} /></label>
-      <label className={labelClass}>Inventario<input id="product-create-stock" name="stock" required type="number" min="0" step="1" className={inputClass} /></label>
-      <label className={labelClass}>Material<input id="product-create-material" name="material" required defaultValue="PLA" className={inputClass} /></label>
-      <label className={labelClass}>Color<input id="product-create-color" name="color" required defaultValue="Estándar" className={inputClass} /></label>
-      <label className={labelClass}>Tamaño<input id="product-create-size" name="size" required defaultValue="Estándar" className={inputClass} /></label>
+      <label className={labelClass}>Costo<input id="product-create-cost_price" name="cost_price" type="number" step="0.01" className={inputClass} /></label>
+      <label className={labelClass}>Inventario<input id="product-create-stock" name="stock" type="number" step="1" className={inputClass} /></label>
+      <label className={labelClass}>Material<input id="product-create-material" name="material" defaultValue="PLA" className={inputClass} /></label>
+      <label className={labelClass}>Color<input id="product-create-color" name="color" defaultValue="Estándar" className={inputClass} /></label>
+      <label className={labelClass}>Tamaño<input id="product-create-size" name="size" defaultValue="Estándar" className={inputClass} /></label>
       <label className={labelClass}>Estado<select id="product-create-status" name="status" defaultValue="AVAILABLE" className={inputClass}>{productStatuses.map((status) => <option key={status}>{status}</option>)}</select></label>
-      <label className={labelClass}>Imagen principal<input id="product-create-image" name="image" required type="file" accept="image/png,image/jpeg,image/webp" className={inputClass} /></label>
-      <label className={`${labelClass} md:col-span-2`}>Descripción del producto<textarea id="product-create-description_es" name="description_es" rows={3} className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">La descripción en inglés se genera automáticamente al guardar.</span></label>
+      <label className={labelClass}>Imagen principal<input id="product-create-image" name="image" type="file" accept="image/png,image/jpeg,image/webp" className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">Opcional; si no la subes se muestra una imagen provisional.</span></label>
+      <label className={`${labelClass} md:col-span-2`}>Descripción del producto<textarea id="product-create-description_es" name="description_es" required minLength={1} rows={3} className={inputClass} /><span className="block text-[11px] font-normal text-slate-500">La descripción es obligatoria; el inglés se genera automáticamente.</span></label>
       {error && <p className="md:col-span-2 rounded-xl border border-red-800 bg-red-950/40 p-3 text-xs text-red-300">{error}</p>}
       <div className="md:col-span-2 flex justify-end gap-2"><button type="button" onClick={onClose} className="rounded-xl border border-brand-dark-border px-4 py-2 text-xs">Cancelar</button><button disabled={saving} className="flex items-center gap-2 rounded-xl bg-brand-cyan px-4 py-2 text-xs font-bold text-slate-950">{saving && <Loader2 className="h-4 w-4 animate-spin" />}Crear producto</button></div>
     </form>
