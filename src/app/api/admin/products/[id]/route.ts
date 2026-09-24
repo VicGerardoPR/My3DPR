@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminErrorResponse, getAdminDatabase, requireAdmin } from '@/lib/admin-auth';
+import { productImageStoragePaths } from '@/lib/admin-product-deletion';
 
 const updateSchema = z.object({
   name_es: z.string().trim().min(2).max(160).optional(),
@@ -48,11 +49,30 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const { id } = await context.params;
-  const archiveRequest = new NextRequest(request.url, {
-    method: 'PATCH',
-    headers: request.headers,
-    body: JSON.stringify({ archived: true }),
-  });
-  return PATCH(archiveRequest, { params: Promise.resolve({ id }) });
+  try {
+    const admin = await requireAdmin(request, 'manage_products');
+    const { id } = await context.params;
+    const db = getAdminDatabase();
+    const { data, error } = await db.rpc('admin_delete_product', {
+      p_actor_user_id: admin.userId,
+      p_product_id: id,
+    });
+    if (error || !data) {
+      if (error?.message.includes('product not found')) return NextResponse.json({ error: 'Producto no encontrado.' }, { status: 404 });
+      throw new Error(`Could not delete product: ${error?.code || 'missing'}`);
+    }
+
+    const storagePaths = productImageStoragePaths(data.images);
+    let storageCleanupWarning = false;
+    if (storagePaths.length > 0) {
+      const { error: cleanupError } = await db.storage.from('product-images').remove(storagePaths);
+      if (cleanupError) {
+        storageCleanupWarning = true;
+        console.error(JSON.stringify({ area: 'admin-product-storage-delete', code: cleanupError.name }));
+      }
+    }
+    return NextResponse.json({ deleted: true, productId: id, storageCleanupWarning });
+  } catch (error) {
+    return adminErrorResponse(error);
+  }
 }
