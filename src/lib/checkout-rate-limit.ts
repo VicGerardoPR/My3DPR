@@ -14,3 +14,7 @@ export function checkoutRateLimitBuckets(ip: string, email: string) {
     `checkout:email:day:${emailHash}`,
   ];
 }
+
+export function checkoutQuoteRateLimitBucket(ip: string) {
+  return `checkout:quote:ip:minute:${fingerprint(ip)}`;
+}
