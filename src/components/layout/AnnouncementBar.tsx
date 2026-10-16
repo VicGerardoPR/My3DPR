@@ -9,7 +9,7 @@ export function AnnouncementBar({ lang }: { lang: 'es' | 'en' }) {
       <div className="container mx-auto flex items-center justify-center gap-3 text-center">
         <span className="inline-flex items-center gap-1.5 font-semibold text-brand-cyan">
           <Truck className="w-3.5 h-3.5" />
-          {lang === 'es' ? 'ENVÍOS GRATIS a Puerto Rico & EE.UU. en compras mayores de $50' : 'FREE SHIPPING to PR & USA on orders over $50'}
+          {lang === 'es' ? 'ENVÍO GRATIS a Puerto Rico y EE.UU. desde $50' : 'FREE SHIPPING to PR & USA on orders of $50 or more'}
         </span>
         <span className="hidden md:inline-block text-slate-500">•</span>
         <Link
